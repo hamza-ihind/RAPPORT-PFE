@@ -1,0 +1,49 @@
+# ===== LaTeX auxiliary files =====
+build/
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.brf
+*.fdb_latexmk
+*.fls
+*.glo
+*.gls
+*.glg
+*.ist
+*.lof
+*.log
+*.lot
+*.out
+*.run.xml
+*.slo
+*.sls
+*.slg
+*.toc
+*.acn
+*.acr
+*.alg
+*.synctex.gz
+*.synctex(busy)
+
+# ===== Minted cache =====
+_minted-*/
+_*.data.minted
+*.pyg
+
+# ===== Generated PDF (uncomment if you want to track it) =====
+# *.pdf
+
+# ===== Backup files =====
+*-backup.*
+*.bak
+*.backup
+*~
+
+# ===== OS files =====
+Thumbs.db
+.DS_Store
+
+# ===== Editor files =====
+*.swp
+*.swo

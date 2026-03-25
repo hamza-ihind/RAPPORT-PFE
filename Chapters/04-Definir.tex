@@ -1,0 +1,253 @@
+\chapter{Définir}
+\label{cp:definir}
+
+\textit{À compléter.}
+
+\section{Charte de projet}
+
+Le \autoref{tab:charte-projet} présente la charte du projet.
+
+\begin{table}[H]
+\centering
+\caption{Charte de projet}
+\label{tab:charte-projet}
+
+\begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{3.8cm}|X|}
+
+\hline
+\rowcolor{headerblue}
+\multicolumn{2}{|c|}{\textcolor{white}{\large\bfseries Charte de projet}} \\
+\hline
+
+\rowcolor{rowlight}
+Entreprise & Segula Technologies Maroc \\
+\hline
+
+\rowcolor{rowwhite}
+Maître d'œuvre & Hamza Ihind \\
+\hline
+
+\rowcolor{rowlight}
+Département & Mécanique \\
+\hline
+
+\rowcolor{rowwhite}
+Objet de projet &
+  Développement des macros CATIA automatisées servant d'outils de Q-Checker métier \\
+\hline
+
+\rowcolor{rowlight}
+Membres d'équipe projet &
+  \begin{minipage}[t]{\linewidth}
+    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
+      \item \textbf{Hamza Ihind} -- Réalisation et développement
+      \item \textbf{Berrada Hamza} -- Supervision
+    \end{itemize}
+    \vspace{4pt}
+  \end{minipage} \\
+\hline
+
+\rowcolor{rowwhite}
+Période &
+  \textbf{Date de départ :} 10/02/2026 \quad\textbf{|}\quad \textbf{Date cible :} 10/06/2026 \\
+\hline
+
+\rowcolor{rowlight}
+Enjeux &
+  \begin{minipage}[t]{\linewidth}
+    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
+      \item Respecter le délai
+      \item Respecter les normes
+    \end{itemize}
+    \vspace{4pt}
+  \end{minipage} \\
+\hline
+
+\rowcolor{rowwhite}
+Objectifs &
+  \begin{minipage}[t]{\linewidth}
+    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
+      \item Analyse des règles métier CATIA à contrôler
+      \item Définition des critères de conformité
+      \item Développement de macros CATIA (VBA / CATScript) pour :
+        \begin{itemize}[leftmargin=1.5em, nosep, topsep=2pt, label=\textbullet]
+          \item Détecter les non-conformités
+          \item Générer des rapports automatiques
+        \end{itemize}
+      \item Tests sur des cas réels projets
+      \item Amélioration continue des macros selon retours utilisateurs
+    \end{itemize}
+    \vspace{4pt}
+  \end{minipage} \\
+\hline
+
+\rowcolor{rowlight}
+Contraintes &
+  \begin{minipage}[t]{\linewidth}
+    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
+      \item Complexité d'accès aux documents nécessaires vu la confidentialité
+    \end{itemize}
+    \vspace{4pt}
+  \end{minipage} \\
+\hline
+
+\rowcolor{rowwhite}
+Hypothèses de réussite &
+  \begin{minipage}[t]{\linewidth}
+    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
+      \item Les règles métiers sont bien respectées
+      \item Bonne mise en œuvre de la démarche DMAIC
+    \end{itemize}
+    \vspace{4pt}
+  \end{minipage} \\
+\hline
+
+\end{tabularx}
+\end{table}
+
+Le \autoref{tab:comparaison-methodes} présente une comparaison entre les trois principales méthodes de résolution de problèmes utilisées dans l'industrie.
+
+\begin{table}[H]
+\centering
+\caption{Comparaison des méthodes PDCA, DMAIC et 8D}
+\label{tab:comparaison-methodes}
+\begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{2.4cm}|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\raggedright\arraybackslash}X|}
+
+\hline
+\rowcolor{headerblue}
+& \textcolor{white}{\textbf{PDCA}} & \textcolor{white}{\textbf{DMAIC}} & \multicolumn{1}{c|}{\textcolor{white}{\textbf{8D}}} \\
+\hline
+
+\rowcolor{rowlight}
+\multicolumn{1}{|c|}{\multirow{8}{*}{\parbox{2.2cm}{\centering\bfseries Les étapes}}}
+  & \multirow{5}{*}{Plan / Préparer}
+  & Define / Définir
+  & D1 : Constituer l'équipe et collecter les informations \\
+\cline{3-4}
+
+\rowcolor{rowlight}
+\multicolumn{1}{|c|}{}
+  &
+  & \multirow{2}{*}{Measure / Mesurer}
+  & D2 : Décrire le problème \\
+\cline{4-4}
+
+\rowcolor{rowlight}
+\multicolumn{1}{|c|}{}
+  &
+  &
+  & D3 : Définir des actions de contournement \\
+\cline{3-4}
+
+\rowcolor{rowlight}
+\multicolumn{1}{|c|}{}
+  &
+  & \multirow{2}{*}{Analyze / Analyser}
+  & D4 : Analyser les causes racines \\
+\cline{4-4}
+
+\rowcolor{rowlight}
+\multicolumn{1}{|c|}{}
+  &
+  &
+  & D5 : Définir des actions correctives potentielles \\
+\cline{2-4}
+
+\rowcolor{rowwhite}
+\multicolumn{1}{|c|}{}
+  & Do / Réaliser
+  & Improve / Améliorer
+  & D6 : Mettre en œuvre des actions correctives \\
+\cline{2-4}
+
+\rowcolor{rowlight}
+\multicolumn{1}{|c|}{}
+  & Check / Vérifier
+  & \multirow{2}{*}{Control / Contrôler}
+  & D7 : Définir des actions préventives \\
+\cline{2-2}\cline{4-4}
+
+\rowcolor{rowwhite}
+\multicolumn{1}{|c|}{}
+  & Act / Ajuster
+  &
+  & D8 : Féliciter l'équipe \\
+\hline
+
+\rowcolor{rowlight}
+Taille de problème & Moyenne & Grande & Petite \\
+\hline
+
+\rowcolor{rowwhite}
+Type de stratégie & Amélioration continue & Amélioration à long terme & Action rapide \\
+\hline
+
+\end{tabularx}
+\end{table}
+
+\section{Méthodologie de travail}
+
+\subsection{Choix de la démarche appropriée}
+
+Pour garantir le succès de ce projet, il est essentiel de sélectionner une méthodologie de travail adaptée permettant de gérer et de structurer les différentes étapes, depuis la définition du problème jusqu'à son analyse, puis la mise en œuvre de solutions. Parmi les approches couramment utilisées pour la résolution de problèmes dans l'industrie figurent le DMAIC, le PDCA et la méthode 8D. Ces méthodes peuvent être catégorisées selon deux critères principaux :
+
+\begin{itemize}
+    \item La taille du problème à résoudre (petite, moyenne ou grande).
+    \item La nature de la stratégie adoptée : s'il s'agit d'un processus d'amélioration continue ou de la résolution d'un problème spécifique.
+\end{itemize}
+
+À l'issue de cette analyse comparative, nous constatons que la démarche DMAIC est la plus adaptée à notre situation, compte tenu de la complexité du problème traité et de notre objectif d'amélioration à long terme.
+
+\subsection{Définition de la démarche DMAIC}
+
+DMAIC fait référence à un cycle visant à améliorer, optimiser et développer la conception au sein d'un service. Cette démarche est basée sur une approche structurée en cinq étapes ordonnancées selon une logique rigoureuse. Chaque lettre composant l'acronyme DMAIC correspond à l'initiale de la fonction de l'étape correspondante :
+
+\begin{itemize}
+    \item \textbf{Define (Définir)} : consiste à définir clairement les objectifs du projet, les besoins des clients, les exigences et les contraintes.
+    \item \textbf{Measure (Mesurer)} : consiste à rassembler les informations nécessaires pour traiter le sujet de façon objective, ainsi qu'à identifier les zones critiques.
+    \item \textbf{Analyze (Analyser)} : vise à analyser les données collectées pour identifier les causes racines des problèmes et les opportunités d'amélioration.
+    \item \textbf{Improve (Améliorer/Innover)} : porte sur le développement et la mise en œuvre de solutions dont les performances correspondent aux objectifs fixés.
+    \item \textbf{Control (Contrôler/Vérifier)} : consiste à vérifier la performance et à suivre les résultats des solutions mises en œuvre afin de pérenniser les gains obtenus.
+\end{itemize}
+
+\section{Outils utilisés}
+
+Pour mener à bien ce projet, plusieurs outils logiciels ont été mobilisés, chacun répondant à un besoin spécifique du cycle de développement.
+
+\subsection{Conception et développement}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[height=1.8cm]{Figures/tools/catia.png}\\[0.6em]
+    \textbf{CATIA V5}\\
+    \textit{Modélisation 3D des pièces\\et exécution des macros}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[height=1.8cm]{Figures/tools/vs.png}\\[0.6em]
+    \textbf{Visual Studio}\\
+    \textit{Développement et débogage\\des macros VBA / CATScript}
+\end{minipage}
+\end{figure}
+
+\subsection{Analyse des données}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[height=1.8cm]{Figures/tools/excel.png}\\[0.6em]
+    \textbf{Microsoft Excel}\\
+    \textit{Manipulation des données\\et rapports de conformité}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[height=1.8cm]{Figures/tools/latex.png}\\[0.6em]
+    \textbf{\LaTeX}\\
+    \textit{Rédaction structurée du rapport\\avec gestion automatique des références}
+\end{minipage}
+\end{figure}

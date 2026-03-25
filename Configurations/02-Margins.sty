@@ -1,0 +1,49 @@
+%%% Margins %%%
+\usepackage{geometry}
+\ifthenelse{\equal{\BookPrintOption}{false}}{%
+    \geometry{
+        paper=a4paper,
+        top=2.3cm,
+        bottom=2.3cm,
+        left=2.2cm,
+        right=2.2cm,
+        footskip=1.6cm,
+        headsep=0.75cm,
+        % showframe % Uncomment to display margin frames for debugging.
+    }
+}{%
+    \geometry{
+        paper=a4paper,
+        top=2.54cm,
+        bottom=2.54cm,
+        inner=2.54cm,
+        outer=3.81cm,
+        footskip=1.6cm,
+        headsep=0.75cm,
+        bindingoffset=0.5cm,
+        % showframe % Uncomment to display margin frames for debugging.
+    }
+}
+
+\addtolength{\textheight}{-20pt} % Decrease text height slightly.
+\setlength{\headheight}{20pt} % Set header height.
+
+\setlength{\parindent}{0pt} % Remove all paragraph indentation.
+\setlength{\parskip}{0.6em plus 0.2em minus 0.1em} % Add spacing between paragraphs.
+
+% Reduce spacing in Table of Contents.
+\usepackage{tocloft}
+\setlength{\cftbeforechapskip}{3pt} % Space before chapter entries in TOC.
+\setlength{\cftbeforesecskip}{1pt} % Space before section entries in TOC.
+\setlength{\cftbeforesubsecskip}{1pt} % Space before subsection entries in TOC.
+
+% Float placement: keep figures/tables close to where they are referenced.
+\usepackage{float} % Provides [H] placement specifier.
+\usepackage[section]{placeins} % Prevent floats from crossing section boundaries.
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.9}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.8}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{3}
+\setcounter{totalnumber}{5}

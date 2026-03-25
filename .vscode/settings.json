@@ -1,0 +1,63 @@
+{
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "latexmk (xelatex)",
+      "tools": ["latexmk"]
+    },
+    {
+      "name": "latexmk (clean)",
+      "tools": ["latexmk-clean"]
+    }
+  ],
+  "latex-workshop.latex.tools": [
+    {
+      "name": "latexmk",
+      "command": "latexmk",
+      "args": [
+        "-xelatex",
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "-shell-escape",
+        "-aux-directory=build",
+        "%DOC%"
+      ]
+    },
+    {
+      "name": "latexmk-clean",
+      "command": "latexmk",
+      "args": ["-C", "-aux-directory=build", "%DOC%"]
+    }
+  ],
+  "latex-workshop.latex.autoBuild.run": "onSave",
+  "latex-workshop.latex.autoClean.run": "onBuilt",
+  "latex-workshop.latex.clean.fileTypes": [
+    "build/*.aux",
+    "build/*.bbl",
+    "build/*.bcf",
+    "build/*.blg",
+    "build/*.fdb_latexmk",
+    "build/*.fls",
+    "build/*.glo",
+    "build/*.gls",
+    "build/*.ist",
+    "build/*.lof",
+    "build/*.log",
+    "build/*.lot",
+    "build/*.out",
+    "build/*.run.xml",
+    "build/*.slo",
+    "build/*.toc",
+    "build/*.acn",
+    "build/*.acr",
+    "build/*.alg",
+    "build/*.glg"
+  ],
+  "files.exclude": {
+    "build/": true,
+    "**/*.synctex.gz": true,
+    "_minted-IPLeiriaMain/": true
+  },
+  "latex-workshop.chktex.args.active": ["-n1", "-n2"],
+  "latex-workshop.chktex.enabled": false
+}

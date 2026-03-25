@@ -1,0 +1,3 @@
+# Suppress "Command terminated with space" for common LaTeX commands
+# that don't take arguments (chktex warning 1).
+CmdLine { \makeglossaries \glossarytoc \printnormalglossary \acronymtoc \printacronymglossary \symboltoc \printsymbolglossary \bookmarktocentry \tableofcontents \listoffigures \listoftables }
