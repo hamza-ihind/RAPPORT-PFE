@@ -1,6 +1,6 @@
 %%% Tables %%%
-\setlength{\extrarowheight}{6pt}
-\newcommand{\customtableformatting}{\renewcommand{\arraystretch}{1.3}\small}
+\setlength{\extrarowheight}{3pt}
+\newcommand{\customtableformatting}{\renewcommand{\arraystretch}{1.2}\small}
 \AtBeginEnvironment{tabular}{\customtableformatting} % Apply to tabular.
 \AtBeginEnvironment{tabularx}{\customtableformatting} % Apply to tabularx.
 \preto\longtable{\customtableformatting} % Apply to longtable.
@@ -11,12 +11,12 @@
 \newcolumntype{R}{>{\raggedleft\arraybackslash}X} % Right the 'X' command in tabularx.
 
 %%% Captions %%%
-\captionsetup{skip=6pt} % Whitespace between figures/tables and the caption.
+\captionsetup{skip=4pt} % Whitespace between figures/tables and the caption.
 \captionsetup{
     labelfont={bf,small},
     textfont={it,small}
 } % Caption font style.
-\captionsetup[table]{skip=4pt}
+\captionsetup[table]{skip=3pt}
 
 %%% Lists %%%
 \setlist{noitemsep} % Customise spacing around and inside lists.

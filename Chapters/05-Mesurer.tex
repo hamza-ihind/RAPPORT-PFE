@@ -2,3 +2,59 @@
 \label{cp:mesurer}
 
 \textit{À compléter.}
+
+\section{Solutions proposées : Partie surfacique}
+
+Cette partie se concentre sur les critères de qualité surfacique que nous devons contrôler automatiquement via des macros (outils Q-Checker métier). Dans un premier temps, nous abordons la détection de l'auto-intersection.
+
+\subsection{Auto-intersection (Offset Clipping)}
+
+\subsubsection{Définition du Phénomène}
+L'\textbf{auto-intersection} (ou \textit{Offset Clipping}) survient lors d'une opération de création d'épaisseur (\textit{Thick Surface}) ou de décalage (\textit{Offset}) sur une géométrie complexe. C'est le moment où la nouvelle surface générée se croise elle-même, créant une boucle de matière incohérente.
+
+\subsubsection{Fondements Mathématiques}
+Le succès d'un épaississement dépend de la relation entre la géométrie locale et la distance de décalage.
+
+\begin{itemize}
+    \item[•] \textbf{Vecteur Normal :} La surface décalée $S_d$ est définie par :
+    \begin{equation*}
+        S_d(u,v) = S(u,v) + d \cdot \mathbf{n}(u,v)
+    \end{equation*}
+    \textit{Où $d$ est l'épaisseur et $\mathbf{n}$ est la normale unitaire.}
+    
+    \item[•] \textbf{La Condition de Validité (Règle d'Or) :} Pour éviter toute singularité ou auto-intersection, le rayon de courbure minimal ($R_{min}$) de la surface support doit être strictement supérieur à l'épaisseur ($d$) appliquée :
+    \begin{equation*}
+        R_{min} > d
+    \end{equation*}
+    
+    \item[•] \textbf{Le Point de Rupture :} Si $d \ge R_{min}$, le centre de courbure est "dépassé", la normale s'inverse et la topologie devient \textbf{Non-Manifold}.
+\end{itemize}
+
+\subsubsection{Impacts Industriels (Pourquoi c'est "Faux" ?)}
+Même si CATIA parvient parfois à générer la face, elle est techniquement inexploitable :
+
+\begin{itemize}
+    \item[•] \textbf{Fabrication (FAO) :} Les algorithmes de calcul de trajectoire d'outil (CNC) échouent ou provoquent des collisions car ils ne peuvent pas gérer une "matière négative" ou croisée.
+    \item[•] \textbf{Simulation (FEA) :} Le maillage volumique devient impossible. Les éléments finis s'écrasent ou s'auto-pénètrent, rendant les résultats de crash-test ou de résistance faux.
+    \item[•] \textbf{Impression 3D :} Erreurs critiques lors du \textit{Slicing} (le logiciel ne sait plus distinguer l'intérieur de l'extérieur du volume).
+\end{itemize}
+
+\subsubsection{Stratégies de Correction}
+Dès qu'une auto-intersection est repérée, plusieurs stratégies peuvent être envisagées pour la résoudre :
+\begin{itemize}
+    \item[•] \textbf{Augmentation du Rayon :} Modifier les congés (\textit{Fillets}) pour que $R > d$.
+    \item[•] \textbf{Healing Assistant :} Utiliser les outils de lissage pour éliminer les micro-variations de courbure.
+    \item[•] \textbf{Découpe locale :} Supprimer la zone de conflit et reconstruire une transition propre via un \textit{Multi-sections Surface} ou un \textit{Blend}.
+\end{itemize}
+
+\subsubsection{Logique de la Macro (Q-Checker)}
+La macro de validation chargée de repérer ces problèmes suit cette logique :
+\begin{itemize}
+    \item[•] \textbf{Cible :} Sélectionner l'objet \texttt{HybridShape} (la surface).
+    \item[•] \textbf{Mesure :} Appeler la méthode \texttt{GetMinimumCurvatureRadius()}.
+    \item[•] \textbf{Test :} Comparer la valeur retournée à l'épaisseur standard du projet.
+    \item[•] \textbf{Alerte :} Si $R_{min} \le \text{Epaisseur}$, flaguer la pièce comme "Non-Manufacturable".
+\end{itemize}
+
+Le bloc de code ci-dessous servira à intégrer la macro CATIA ou le script VBA permettant d'exécuter ce test automatique :
+
