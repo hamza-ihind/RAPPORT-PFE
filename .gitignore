@@ -30,6 +30,7 @@ build/
 _minted-*/
 _*.data.minted
 *.pyg
+.claude
 
 # ===== Generated PDF (uncomment if you want to track it) =====
 # *.pdf

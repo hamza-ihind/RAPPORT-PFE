@@ -1,12 +1,187 @@
 % Placez ici tous les termes qui nécessitent une définition dans votre document.
-\newglossaryentry{latex}
+
+\newglossaryentry{qchecker}
 {
-    name=Latex,
-    description={Système de composition de documents couramment utilisé pour la production de documents scientifiques et mathématiques grâce à sa puissante gestion des formules et des références. Il est largement utilisé pour la préparation de documents tels que des articles de recherche, des thèses, des rapports et des articles}
+    name=Q-Checker,
+    description={Outil de vérification qualité des pièces CAO qui permet de détecter automatiquement les non-conformités géométriques et structurelles selon des règles métier prédéfinies}
 }
 
-\newglossaryentry{maths}
+\newglossaryentry{qchecking}
 {
-    name=Mathématiques,
-    description={Les mathématiques sont ce que font les mathématiciens}
+    name=Q-Checking,
+    description={Processus de contrôle qualité d'un modèle CAO consistant à vérifier la conformité de la géométrie par rapport à un ensemble de règles métier et de normes industrielles}
+}
+
+\newglossaryentry{auto-intersection}
+{
+    name=Auto-intersection,
+    description={Phénomène géométrique survenant lors d'une opération de décalage (\textit{Offset}) ou d'épaississement (\textit{Thick Surface}) où la surface générée se croise elle-même, créant une topologie invalide. L'épaisseur appliquée dépasse alors le rayon de courbure minimal de la surface support ($d \ge R_{min}$)}
+}
+
+\newglossaryentry{vrillage}
+{
+    name=Vrillage,
+    description={Anomalie topologique majeure (ou auto-repliement) survenant lors de la génération de surfaces complexes via des fonctions de balayage (\textit{Sweep}) ou de surfaces multi-sections. Se traduit par une inversion locale de la matière où la surface se croise elle-même ($J(u,v) \le 0$)}
+}
+
+\newglossaryentry{offset}
+{
+    name=Offset,
+    description={Opération de décalage d'une surface dans la direction de sa normale d'une distance donnée, utilisée pour créer des épaisseurs ou des faces parallèles}
+}
+
+\newglossaryentry{thick-surface}
+{
+    name=Thick Surface,
+    description={Commande CATIA permettant de créer une entité volumique à partir d'une surface en lui appliquant une épaisseur selon sa normale}
+}
+
+\newglossaryentry{sweep}
+{
+    name=Balayage (Sweep),
+    description={Opération de modélisation consistant à générer une surface ou un volume par translation et/ou rotation d'un profil le long d'une courbe guide (\textit{Spine})}
+}
+
+\newglossaryentry{multi-sections}
+{
+    name=Surface multi-sections,
+    description={Surface CATIA générée par interpolation entre plusieurs profils (sections) reliés par des courbes guides, permettant de modéliser des formes complexes}
+}
+
+\newglossaryentry{manifold}
+{
+    name=Variété (\textit{Manifold}),
+    description={Propriété topologique d'une surface valide : en chaque point, le voisinage est homéomorphe à un disque du plan $\mathbb{R}^2$. Une surface perdit cette propriété lors d'un vrillage ($J \le 0$) ou d'une auto-intersection}
+}
+
+\newglossaryentry{non-manifold}
+{
+    name=Non-\textit{Manifold},
+    description={État d'une topologie de surface invalide où la continuité géométrique est rompue. Rend le modèle inexploitable pour le maillage, l'usinage ou l'impression 3D}
+}
+
+\newglossaryentry{jacobien}
+{
+    name=Déterminant du Jacobien,
+    description={Quantité mathématique $J(u,v) = \left\| \frac{\partial \mathbf{S}}{\partial u} \times \frac{\partial \mathbf{S}}{\partial v} \right\|$ mesurant la régularité de la paramétrisation d'une surface. Si $J = 0$, la surface présente une singularité}
+}
+
+\newglossaryentry{rayon-courbure-min}
+{
+    name=Rayon de courbure minimal,
+    description={Plus petit rayon de courbure ($R_{min}$) d'une surface. Condition critique : pour qu'un épaississement d'épaisseur $d$ soit valide, il faut que $R_{min} > d$}
+}
+
+\newglossaryentry{zebra}
+{
+    name=Lignes de reflet (\textit{Zébras}),
+    description={Méthode de visualisation de la qualité surfacique consistant à projeter des bandes alternées claires et sombres réfléchies sur la surface. Permet de détecter visuellement les ruptures de courbure et les défauts de classe A}
+}
+
+\newglossaryentry{classe-a}
+{
+    name=Classe A (\textit{Class A}),
+    description={Niveau de qualité surfacique le plus élevé en CAO automobile. Les surfaces de classe A doivent présenter une continuité de courbure sans rupture visible, garantissant un aspect visuel parfait (zébras continus)}
+}
+
+\newglossaryentry{fea}
+{
+    name=Analyse par éléments finis (\textit{FEA}),
+    description={Méthode de simulation numérique (\textit{Finite Element Analysis}) consistant à discrétiser un modèle en un maillage d'éléments finis pour résoudre des équations physiques (contraintes, déformations, crash-test, etc.)}
+}
+
+\newglossaryentry{slicing}
+{
+    name=Tranchage (\textit{Slicing}),
+    description={Étape de préparation à l'impression 3D consistant à découper un modèle CAO en couches horizontales successives. Un modèle non-\textit{manifold} provoque des erreurs critiques de tranchage}
+}
+
+\newglossaryentry{cnc}
+{
+    name=\textit{CNC} (\textit{Computer Numerical Control}),
+    description={Commande numérique par calculateur : système automatisé pilotant des machines-outils (fraiseuses, tours) à partir de trajectoires calculées à partir du modèle CAO}
+}
+
+\newglossaryentry{spine}
+{
+    name=Épine (\textit{Spine}),
+    description={Courbe guide principale le long de laquelle un profil est balayé dans une opération de \textit{Sweep}. Si son rayon de courbure est inférieur à la demi-largeur de la section, un vrillage se produit}
+}
+
+\newglossaryentry{couplage}
+{
+    name=Couplage,
+    description={Correspondance entre les points de fermeture (\textit{Closing Points}) de deux sections dans une surface multi-sections. Un défaut de couplage entraîne une torsion diagonale de la surface}
+}
+
+\newglossaryentry{conflit-tangence}
+{
+    name=Conflit de tangence,
+    description={Situation où des vecteurs de tangence imposés aux extrémités d'une surface sont opposés, forçant la surface à effectuer une boucle sur elle-même pour respecter les contraintes géométriques}
+}
+
+\newglossaryentry{fillet}
+{
+    name=Congé (\textit{Fillet}),
+    description={Surface de raccordement arrondie entre deux faces adjacentes. Un rayon de congé trop petit par rapport à l'épaisseur appliquée provoque une auto-intersection}
+}
+
+\newglossaryentry{blend}
+{
+    name=Raccord (\textit{Blend}),
+    description={Surface de transition lisse créée entre deux faces existantes, souvent utilisée comme stratégie de correction pour éliminer une auto-intersection}
+}
+
+\newglossaryentry{hybridshape}
+{
+    name=HybridShape,
+    description={Type d'objet dans l'API CATIA représentant une entité de conception hybride (courbe, surface ou élément de référence) accessible et manipulable par programmation VBA/CATScript}
+}
+
+\newglossaryentry{healing}
+{
+    name=Correction surfacique (\textit{Healing}),
+    description={Opération de lissage automatique de surfaces visant à éliminer les micro-défauts de continuité et les variations de courbure parasites, souvent utilisée comme stratégie de correction d'auto-intersections}
+}
+
+\newglossaryentry{convergence-normales}
+{
+    name=Analyse de convergence des normales,
+    description={Algorithme de détection de vrillage consistant à discrétiser la surface en une grille de points, calculer la normale unitaire en chaque point et vérifier le produit scalaire entre normales adjacentes. Si $\mathbf{n}_{i,j} \cdot \mathbf{n}_{i+1,j} < 0$, un vrillage est détecté}
+}
+
+\newglossaryentry{segula}
+{
+    name=Segula Technologies,
+    description={Groupe d'ingénierie international spécialisé dans l'innovation et le développement industriel, créé en 1985. Présent dans 30 pays avec plus de 15 000 collaborateurs, il intervient dans les secteurs automobile, aéronautique, énergie, ferroviaire, naval et santé}
+}
+
+\newglossaryentry{stellantis}
+{
+    name=Stellantis,
+    description={Groupe automobile international issu de la fusion en 2021 entre PSA (Peugeot S.A.) et FCA (Fiat Chrysler Automobiles), regroupant les marques Peugeot, Citroën, DS, Opel, Vauxhall, Fiat, Chrysler, Jeep et autres}
+}
+
+\newglossaryentry{dmaic-detail}
+{
+    name=DMAIC,
+    description={Méthodologie structurée d'amélioration continue en cinq étapes : \textbf{D}éfinir (Define), \textbf{M}esurer (Measure), \textbf{A}nalyser (Analyze), \textbf{I}nnover/\textbf{I}mprove (Improve), \textbf{C}ontrôler (Control)}
+}
+
+\newglossaryentry{pdca}
+{
+    name=PDCA,
+    description={Cycle d'amélioration continue en quatre étapes : \textbf{P}lan (Planifier), \textbf{D}o (Réaliser), \textbf{C}heck (Vérifier), \textbf{A}ct (Ajuster). Également appelé roue de Deming}
+}
+
+\newglossaryentry{huit-d}
+{
+    name=8D (\textit{Eight Disciplines}),
+    description={Méthodologie de résolution rapide de problèmes en huit étapes (Disciplines), allant de la constitution de l'équipe à la félicitation de l'équipe, en passant par l'analyse des causes racines et la mise en œuvre d'actions correctives et préventives}
+}
+
+\newglossaryentry{charte-projet}
+{
+    name=Charte de projet,
+    description={Document formalisant les objectifs, le périmètre, les acteurs, les contraintes, les hypothèses de réussite et les jalons temporels d'un projet. Elle sert de référence commune entre toutes les parties prenantes}
 }

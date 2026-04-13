@@ -1,0 +1,180 @@
+
+\chapter{Mesurer}
+\label{cp:mesurer}
+
+Après avoir défini les objectifs et le périmètre du projet dans la phase \textit{Définir}, nous entamons désormais la phase \textit{Mesurer} de la démarche DMAIC. Cette étape consiste à quantifier l'état actuel du processus de vérification qualité, à identifier les critères de conformité critiques et à établir des indicateurs de performance mesurables.
+
+L'objectif de cette phase est double : d'une part, collecter les données nécessaires pour évaluer l'ampleur du problème de contrôle qualité sur les surfaces CATIA, et d'autre part, formaliser les règles métier qui serviront de référence pour automatiser les vérifications. Nous nous concentrons en particulier sur les défauts surfaciques tels que les auto-intersections, qui constituent l'un des principaux obstacles à la fabricabilité des pièces conçues.
+
+Cette partie présente les critères de qualité identifiés, leurs fondements mathématiques, ainsi que les mécanismes de détection que les macros Q-Checker métier devront automatiser.
+
+\section{Convention de nommage}
+
+Une convention de nommage est un ensemble de règles permettant d'attribuer des identifiants uniques et cohérents aux entités d'un système. Dans un environnement CAO tel que CATIA, l'absence d'une nomenclature rigoureuse entraîne des difficultés de recherche dans les gestionnaires de données (ENOVIA, Windchill), des erreurs d'assemblage, des complications lors de l'exécution de macros automatisées, ainsi qu'une perte de temps lors des revues de conception.
+
+La convention retenue pour ce projet suit le format \texttt{XXX-0000}, où \texttt{XXX} représente exactement trois lettres majuscules (code famille ou département), suivi d'un tiret séparateur, puis de trois ou quatre chiffres de séquencement. Par exemple, \texttt{MEC-001} et \texttt{ASS-1234} sont des noms conformes, tandis que \texttt{mec-001} (minuscules), \texttt{MEC001} (absence de tiret) ou \texttt{MEC-001A} (caractère supplémentaire) sont rejetés.
+
+\section{Algorithme de vérification}
+
+L'algorithme implémenté dans la macro VBA contrôle automatiquement la conformité des noms de pièces et d'assemblages CATIA. Il repose sur la détection du type de document actif, l'utilisation d'une expression régulière pour valider le format, un parcours récursif pour inspecter tous les niveaux d'un assemblage, et la génération d'un rapport de non-conformités.
+
+\subsection{Pseudocode de l'algorithme}
+
+% TODO : Insérer ici la capture d'écran du pseudocode / code VBA
+\begin{center}
+    \textit{[Image du pseudocode à insérer]}
+    % \includegraphics[width=\textwidth]{Figures/pseudocode-nommage.png}
+\end{center}
+
+\section{Étapes de la macro}
+
+Les principales étapes de fonctionnement de la macro sont les suivantes :
+
+\begin{itemize}
+    \item[$\bullet$] \textbf{Récupération du document actif :} la macro accède au document ouvert dans CATIA via \texttt{CATIA.ActiveDocument}.
+    \item[$\bullet$] \textbf{Identification du type de document :} distinction entre \texttt{PartDocument} (pièce) et \texttt{ProductDocument} (assemblage) à l'aide de \texttt{TypeName()}.
+    \item[$\bullet$] \textbf{Validation du nom (pièce) :} le nom de la pièce est extrait et comparé au pattern \texttt{\textasciicircum[A-Z]\{3\}-\textbackslash d\{3,4\}\$} via une expression régulière.
+    \item[$\bullet$] \textbf{Parcours récursif (assemblage) :} pour un assemblage, la macro inspecte récursivement chaque sous-produit et valide son \texttt{PartNumber}.
+    \item[$\bullet$] \textbf{Génération du rapport :} les noms non conformes sont collectés et affichés dans un message récapitulatif à l'utilisateur.
+\end{itemize}
+
+% TODO : Insérer ici le schéma visuel illustrant le flux de la macro
+\begin{center}
+    \textit{[Schéma visuel du flux de la macro à insérer]}
+    % \includegraphics[width=\textwidth]{Figures/schema-macro-nommage.png}
+\end{center}
+
+\section{Critères de qualité surfacique et macros de détection}
+
+Cette section présente les défauts surfaciques critiques identifiés lors de la phase de mesure, ainsi que les macros Q-Checker développées pour automatiser leur détection. Pour chaque défaut, nous exposons sa définition, ses fondements mathématiques, sa justification métier, puis l'algorithme de vérification associé.
+
+%% ============================================================
+%%  AUTO-INTERSECTION
+%% ============================================================
+\subsection{Auto-intersection (Offset Clipping)}
+
+\subsubsection{Définition et fondements mathématiques}
+
+L'auto-intersection (ou \textit{Offset Clipping}) survient lors d'une opération de création d'épaisseur (\textit{Thick Surface}) ou de décalage (\textit{Offset}) sur une géométrie complexe. La nouvelle surface générée se croise alors elle-même, créant une boucle de matière incohérente.
+
+Mathématiquement, la surface décalée $S_d$ est définie par :
+\begin{equation*}
+    S_d(u,v) = S(u,v) + d \cdot \mathbf{n}(u,v)
+\end{equation*}
+où $d$ est l'épaisseur et $\mathbf{n}$ la normale unitaire. La condition de validité impose que le rayon de courbure minimal ($R_{min}$) soit strictement supérieur à l'épaisseur appliquée :
+\begin{equation*}
+    R_{min} > d
+\end{equation*}
+Lorsque $d \ge R_{min}$, le centre de courbure est dépassé, la normale s'inverse et la topologie devient \textit{Non-Manifold}.
+
+\subsubsection{Justification métier : pourquoi détecter ce défaut ?}
+
+Même si CATIA parvient parfois à générer la face, celle-ci reste techniquement inexploitable en aval :
+
+\begin{itemize}
+    \item[$\bullet$] \textbf{Fabrication (FAO) :} les trajectoires d'outil CNC échouent ou provoquent des collisions face à une matière croisée.
+    \item[$\bullet$] \textbf{Simulation (FEA) :} le maillage volumique devient impossible, rendant les résultats de résistance ou de crash-test invalides.
+    \item[$\bullet$] \textbf{Impression 3D :} le \textit{Slicing} ne parvient plus à distinguer l'intérieur de l'extérieur du volume.
+\end{itemize}
+
+La détection automatisée de ce défaut est donc indispensable pour garantir la fabricabilité des pièces dès la phase de conception.
+
+\subsubsection{Pseudocode de l'algorithme}
+
+% TODO : Insérer ici la capture d'écran du pseudocode / code VBA
+\begin{center}
+    \textit{[Image du pseudocode de la macro auto-intersection à insérer]}
+    % \includegraphics[width=\textwidth]{Figures/pseudocode-auto-intersection.png}
+\end{center}
+
+\subsubsection{Étapes de la macro}
+
+\begin{itemize}
+    \item[$\bullet$] \textbf{Sélection de la cible :} la macro identifie l'objet \texttt{HybridShape} (surface) dans le document actif.
+    \item[$\bullet$] \textbf{Mesure du rayon de courbure :} appel de la méthode \texttt{GetMinimumCurvatureRadius()} sur la surface.
+    \item[$\bullet$] \textbf{Comparaison au seuil :} le rayon mesuré est comparé à l'épaisseur standard du projet ($d$).
+    \item[$\bullet$] \textbf{Génération de l'alerte :} si $R_{min} \le d$, la pièce est signalée comme \textit{Non-Manufacturable}.
+\end{itemize}
+
+% TODO : Insérer ici l'illustration visuelle des étapes de la macro
+\begin{center}
+    \textit{[Illustration visuelle des étapes à insérer]}
+    % \includegraphics[width=\textwidth]{Figures/etapes-macro-auto-intersection.png}
+\end{center}
+
+\subsubsection{Organigramme de la macro}
+
+% TODO : Insérer ici le flowchart de la macro auto-intersection
+\begin{center}
+    \textit{[Organigramme (flowchart) de la macro à insérer]}
+    % \includegraphics[width=0.8\textwidth]{Figures/flowchart-auto-intersection.png}
+\end{center}
+
+%% ============================================================
+%%  VRILLAGE
+%% ============================================================
+\subsection{Vrillage (Auto-repliement)}
+
+\subsubsection{Définition et fondements mathématiques}
+
+Le vrillage (ou \textit{auto-repliement}) est une anomalie topologique majeure survenant lors de la génération de surfaces complexes via les fonctions de balayage (\textit{Sweep}) ou de surfaces multi-sections. Il se traduit par une inversion locale de la matière où la surface se croise elle-même.
+
+Pour qu'une surface $\mathbf{S}(u,v)$ soit valide, sa paramétrisation doit être régulière. Le déterminant du Jacobien ($J$) traduit cette régularité :
+\begin{equation*}
+    J(u,v) = \left\| \frac{\partial \mathbf{S}}{\partial u} \times \frac{\partial \mathbf{S}}{\partial v} \right\|
+\end{equation*}
+
+\begin{itemize}
+    \item[$\bullet$] \textbf{Surface saine :} $J(u,v) > 0$ sur l'ensemble du domaine paramétrique.
+    \item[$\bullet$] \textbf{Vrillage :} apparaît lorsque $J(u,v) \le 0$. La surface perd alors sa propriété de variété (\textit{manifold}) ; les vecteurs tangents deviennent colinéaires, provoquant un effondrement géométrique.
+\end{itemize}
+
+Trois causes racines génèrent ce défaut en CAO :
+\begin{itemize}
+    \item[$\bullet$] \textbf{Défaut de couplage :} mauvaise correspondance des points de fermeture (\textit{Closing Points}) entre sections.
+    \item[$\bullet$] \textbf{Conflit de tangence :} vecteurs de tangence opposés aux extrémités forçant une boucle.
+    \item[$\bullet$] \textbf{Saturation de l'épine (\textit{Spine}) :} rayon de courbure de la courbe guide inférieur à la demi-largeur de la section balayée.
+\end{itemize}
+
+\subsubsection{Justification métier : pourquoi détecter ce défaut ?}
+
+Le vrillage constitue un critère d'exclusion lors du \textit{Q-Checking} :
+
+\begin{itemize}
+    \item[$\bullet$] \textbf{Maillage (FEA) :} les solveurs ne peuvent pas traiter des faces auto-pénétrantes, entraînant un échec de simulation.
+    \item[$\bullet$] \textbf{Usinage (FAO) :} les normales erronées provoquent des collisions d'outil ou des trajectoires impossibles.
+    \item[$\bullet$] \textbf{Qualité perçue (Class A) :} rupture brutale des lignes de reflet (zébras), inacceptable en carrosserie.
+\end{itemize}
+
+La macro de détection permet d'identifier ces zones critiques avant toute transmission aux métiers aval.
+
+\subsubsection{Pseudocode de l'algorithme}
+
+% TODO : Insérer ici la capture d'écran du pseudocode / code VBA
+\begin{center}
+    \textit{[Image du pseudocode de la macro vrillage à insérer]}
+    % \includegraphics[width=\textwidth]{Figures/pseudocode-vrillage.png}
+\end{center}
+
+\subsubsection{Étapes de la macro}
+
+\begin{itemize}
+    \item[$\bullet$] \textbf{Discrétisation :} balayage de la surface sur une grille de points $P_{i,j}$.
+    \item[$\bullet$] \textbf{Calcul des normales :} extraction du vecteur unitaire $\mathbf{n}_{i,j}$ en chaque point.
+    \item[$\bullet$] \textbf{Test d'inversion :} si $\mathbf{n}_{i,j} \cdot \mathbf{n}_{i+1,j} < 0$, une inversion de normale est détectée.
+    \item[$\bullet$] \textbf{Verdict :} la zone est identifiée comme \textit{Twisted Surface} et la validation du modèle est bloquée.
+\end{itemize}
+
+% TODO : Insérer ici l'illustration visuelle des étapes de la macro
+\begin{center}
+    \textit{[Illustration visuelle des étapes à insérer]}
+    % \includegraphics[width=\textwidth]{Figures/etapes-macro-vrillage.png}
+\end{center}
+
+\subsubsection{Organigramme de la macro}
+
+% TODO : Insérer ici le flowchart de la macro vrillage
+\begin{center}
+    \textit{[Organigramme (flowchart) de la macro à insérer]}
+    % \includegraphics[width=0.8\textwidth]{Figures/flowchart-vrillage.png}
+\end{center}
