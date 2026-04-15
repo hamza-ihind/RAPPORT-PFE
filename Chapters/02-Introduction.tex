@@ -1,11 +1,16 @@
-\chapter{Introduction}
+\chapter{Présentation de l'organisme d'accueil et contexte du projet}
 \label{cp:introduction}
 
-\textit{Avant de conduire un projet au sein d'une entreprise, il est indispensable d'en appréhender l'organisation et les champs de compétence. Ce chapitre débute donc par une présentation du groupe Segula Technologies, avec un focus particulier sur son pôle << Crash >>, cadre principal du stage. Cette mise en contexte permettra de comprendre l'environnement technique et méthodologique dans lequel s'inscrit le travail qui suit.}
+\textit{Avant de conduire un projet au sein d'une entreprise, il est indispensable d'en appréhender l'organisation et les champs de compétence. Ce chapitre débute par une présentation du groupe Segula Technologies, avec un focus particulier sur sa filiale marocaine, cadre principal du stage. La seconde partie situe le projet dans son contexte en définissant les objectifs, la problématique, la méthodologie adoptée et la planification retenue.}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  SECTION I — SEGULA TECHNOLOGIES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Segula Technologies}
 
+%% ---- I.1 Présentation ----
 \subsection{Présentation de Segula Technologies}
+
 Segula Technologies est un groupe d'ingénierie international spécialisé dans l'innovation et le développement industriel. Créée en 1985, l'entreprise accompagne les grands acteurs industriels dans divers secteurs tels que l'aéronautique, l'automobile, l'énergie, le ferroviaire, le naval et la santé. L'entreprise se distingue par son engagement envers l'innovation, avec plus de 130 projets de R\&D chaque année, couvrant des domaines comme l'intelligence artificielle, la fabrication additive et la transition énergétique.
 
 \begin{figure}[H]
@@ -45,7 +50,20 @@ La \autoref{fig:segula-worldwide} illustre la présence mondiale de Segula Techn
     \end{tabularx}
 \end{table}
 
+\subsubsection*{Segula Technologies Maroc}
+
+SEGULA Technologies Maroc est une filiale du groupe SEGULA Technologies en Afrique, créée en 2007. Grâce à ses bureaux d'études à Casablanca et à Agadir, ainsi sa filiale SIMRA. La filiale marocaine emploie plus de 700 ingénieurs et techniciens hautement qualifiés, avec un fort chiffre d'affaires plus de 22 millions d'euros en 2021. La filiale a travaillé sur la conception et l'industrialisation de nouveaux produits ou nouvelles usines pour ses clients. Elle offre des services d'ingénierie et de conseil pour la conception de véhicules, l'optimisation des processus de production, la gestion de la chaîne d'approvisionnement, l'analyse des coûts, la simulation et la modélisation.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{Figures/SIMRA.png}
+    \caption{Logo de SIMRA - filiale de Segula Technologies Maroc}
+    \label{fig:simra-logo}
+\end{figure}
+
+%% ---- I.2 Fiche technique ----
 \subsection{Fiche technique}
+
 Le \autoref{tab:fiche-technique} présente en détails l'ensemble des informations sur l'entreprise d'accueil :
 
 \begin{table}[H]
@@ -73,7 +91,8 @@ Le \autoref{tab:fiche-technique} présente en détails l'ensemble des informatio
     \end{tabularx}
 \end{table}
 
-\subsection{Activité}
+%% ---- I.3 Activités ----
+\subsection{Activités}
 
 Segula Technologies est le premier groupe européen de conseil et d'ingénierie en innovation technologique. Le groupe couvre toutes les phases du cycle de vie d'un projet, de sa définition (veille technologique, études de faisabilité technique, définition des stratégies, etc.) à sa concrétisation (conception, mise en œuvre et validation de solutions, etc.). L'activité s'organise autour de 2 axes :
 
@@ -82,7 +101,8 @@ Segula Technologies est le premier groupe européen de conseil et d'ingénierie 
     \item[•] Conseil en organisation et en systèmes d'information.
 \end{itemize}
 
-\subsection{Domaines d'interventions}
+%% ---- I.4 Domaines d'intervention ----
+\subsection{Domaines d'intervention}
 
 Le groupe Segula Technologies travaille sur différents secteurs dont le secteur industriel et le secteur tertiaire. Au sein du secteur industriel, il joue un rôle très important en étant porté sur plusieurs domaines : l'automobile, l'aéronautique, le naval, le ferroviaire, l'énergie, et encore le pharmaceutique.
 
@@ -92,6 +112,7 @@ Le groupe Segula Technologies travaille sur différents secteurs dont le secteur
     \caption{Les divers secteurs d'activité de SEGULA Technologies}
 \end{figure}
 
+%% ---- I.5 Clients ----
 \subsection{Clients}
 
 Segula Technologies travaille avec une diversité de clients dans plusieurs secteurs, notamment l'automobile, l'aéronautique et le ferroviaire. En aéronautique, elle collabore avec des leaders de l'industrie pour développer des technologies avancées et optimiser la production. Dans le ferroviaire, Segula soutient des entreprises majeures en offrant des solutions innovantes pour le transport sur rail.
@@ -140,16 +161,231 @@ Le \autoref{tab:clients-partenaires} présente les principaux clients et partena
     \end{tabularx}
 \end{table}
 
-\section{Groupe Segula Technologies Maroc}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  SECTION II — CONTEXTUALISATION DU PROJET
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Contextualisation du projet}
 
-\subsection{Présentation de Segula Technologies Maroc}
+%% ---- II.1 Objectif ----
+\subsection{Objectif}
 
-SEGULA Technologies Maroc est une filiale du groupe SEGULA Technologies en Afrique, créée en 2007. Grâce à ses bureaux d'études à Casablanca et à Agadir, ainsi sa filiale SIMRA. La filiale marocaine emploie plus de 700 ingénieurs et techniciens hautement qualifiés, avec un fort chiffre d'affaires plus de 22 millions d'euros en 2021. La filiale a travaillé sur la conception et l'industrialisation de nouveaux produits ou nouvelles usines pour ses clients. Elle offre des services d'ingénierie et de conseil pour la conception de véhicules, l'optimisation des processus de production, la gestion de la chaîne d'approvisionnement, l'analyse des coûts, la simulation et la modélisation.
+L'objectif principal de ce projet est de \textbf{développer des macros CATIA automatisées} jouant le rôle d'outils de \textbf{Q-Checker métier}, permettant de contrôler automatiquement la conformité des modèles CAO (pièces et assemblages) aux règles métier internes de Segula Technologies Maroc. Ces outils visent à remplacer les vérifications manuelles, souvent chronophages et sujettes aux erreurs humaines, par un processus automatisé, fiable et reproductible.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.4\textwidth]{Figures/SIMRA.png}
-    \caption{Logo de SIMRA - filiale de Segula Technologies Maroc}
-    \label{fig:simra-logo}
-\end{figure}
+En d'autres termes, il s'agit de concevoir, développer et valider un ensemble de macros VBA/CATScript intégrées à l'environnement CATIA V5, capables de détecter les non-conformités géométriques, topologiques et de nomenclature dans les livrables de conception.
 
+%% ---- II.2 Objectifs spécifiques ----
+\subsection{Objectifs spécifiques}
+
+Pour atteindre l'objectif global, le projet se décline en plusieurs objectifs spécifiques :
+
+\begin{enumerate}
+    \item \textbf{Analyse des règles métier CATIA à contrôler :} identifier et formaliser l'ensemble des critères de conformité imposés par les normes internes et les exigences clients (convention de nommage, qualité surfacique, solidité des modèles, etc.).
+
+    \item \textbf{Définition des critères de conformité :} établir les seuils de tolérance, les expressions régulières de validation et les conditions mathématiques permettant de distinguer un modèle conforme d'un modèle non conforme.
+
+    \item \textbf{Développement des macros de contrôle :} programmer en VBA/CATScript les macros automatisées permettant de :
+    \begin{itemize}
+        \item Détecter les non-conformités de nommage (convention \texttt{XXX-0000}).
+        \item Identifier les défauts surfaciques critiques (auto-intersection, vrillage).
+        \item Générer des rapports automatiques de conformité.
+    \end{itemize}
+
+    \item \textbf{Tests et validation sur des cas réels :} valider les macros sur des projets réels de l'entreprise pour s'assurer de leur robustesse et de leur fiabilité.
+
+    \item \textbf{Amélioration continue :} itérer sur les macros en intégrant les retours des utilisateurs métier afin d'optimiser leur ergonomie et leur couverture de contrôle.
+\end{enumerate}
+
+%% ---- II.3 Problématique ----
+\subsection{Problématique}
+
+Dans le cadre de la conception assistée par ordinateur (CAO) au sein de Segula Technologies Maroc, le contrôle qualité des modèles CATIA constitue une étape cruciale avant toute livraison aux métiers aval (simulation, fabrication, industrialisation). Or, ce processus de vérification repose actuellement en grande partie sur des contrôles manuels, effectués pièce par pièce par les ingénieurs concepteurs.
+
+Cette approche présente plusieurs limites majeures :
+
+\begin{itemize}
+    \item[$\bullet$] \textbf{Temps de vérification considérable :} le contrôle manuel d'un assemblage complexe peut prendre plusieurs heures, voire des jours, mobilisant des ressources humaines précieuses.
+    \item[$\bullet$] \textbf{Risque d'erreur humaine :} certaines non-conformités subtiles (auto-intersection, vrillage, nomenclature incorrecte) peuvent passer inaperçues lors d'une inspection visuelle.
+    \item[$\bullet$] \textbf{Manque de traçabilité :} en l'absence de rapports automatisés, il est difficile de suivre l'historique des contrôles et de garantir la reproductibilité des vérifications.
+    \item[$\bullet$] \textbf{Confidentialité des documents :} la complexité d'accès aux normes et spécifications clients rend la standardisation des contrôles encore plus difficile.
+\end{itemize}
+
+\textbf{La problématique centrale} de ce projet peut donc se formuler ainsi :
+
+\begin{center}
+\textit{Comment automatiser le contrôle qualité des modèles CATIA afin de garantir la conformité des livrables aux règles métier, tout en réduisant le temps de vérification et les risques d'erreur humaine ?}
+\end{center}
+
+%% ---- II.4 Charte du projet et Cahier des charges ----
+\subsection{Charte du projet et Cahier des charges}
+
+Le \autoref{tab:charte-projet} présente la charte du projet, qui résume les informations essentielles relatives au cadrage, aux acteurs, aux objectifs et aux contraintes du projet.
+
+\begin{table}[H]
+\centering
+\caption{Charte de projet}
+\label{tab:charte-projet}
+
+\begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{3.8cm}|X|}
+
+\hline
+\rowcolor{headerblue}
+\multicolumn{2}{|c|}{\textcolor{white}{\large\bfseries Charte de projet}} \\
+\hline
+
+\rowcolor{rowlight}
+Entreprise & Segula Technologies Maroc \\
+\hline
+
+\rowcolor{rowwhite}
+Maître d'œuvre & Hamza Ihind \\
+\hline
+
+\rowcolor{rowlight}
+Département & Mécanique \\
+\hline
+
+\rowcolor{rowwhite}
+Objet de projet &
+  Développement des macros CATIA automatisées servant d'outils de Q-Checker métier \\
+\hline
+
+\rowcolor{rowlight}
+Membres d'équipe projet &
+  \begin{minipage}[t]{\linewidth}
+    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
+      \item \mdseries Hamza Ihind -- Réalisation et développement
+      \item \mdseries Anas Elrhazi -- Supervision
+    \end{itemize}
+    \vspace{4pt}
+  \end{minipage} \\
+\hline
+
+\rowcolor{rowwhite}
+Période &
+  \mdseries{Date de départ :} 10/02/2026 \quad\mdseries{|}\quad \mdseries{Date cible :} 10/06/2026 \\
+\hline
+
+\rowcolor{rowlight}
+Enjeux &
+  \begin{minipage}[t]{\linewidth}
+    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
+      \item Respecter le délai
+      \item Respecter les normes
+    \end{itemize}
+    \vspace{4pt}
+  \end{minipage} \\
+\hline
+
+\rowcolor{rowwhite}
+Objectifs &
+  \begin{minipage}[t]{\linewidth}
+    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
+      \item Analyse des règles métier CATIA à contrôler
+      \item Définition des critères de conformité
+      \item Développement de macros CATIA (VBA / CATScript) pour :
+        \begin{itemize}[leftmargin=1.5em, nosep, topsep=2pt, label=\textbullet]
+          \item Détecter les non-conformités
+          \item Générer des rapports automatiques
+        \end{itemize}
+      \item Tests sur des cas réels projets
+      \item Amélioration continue des macros selon retours utilisateurs
+    \end{itemize}
+    \vspace{4pt}
+  \end{minipage} \\
+\hline
+
+\rowcolor{rowlight}
+Contraintes &
+  \begin{minipage}[t]{\linewidth}
+    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
+      \item Complexité d'accès aux documents nécessaires vu la confidentialité
+    \end{itemize}
+    \vspace{4pt}
+  \end{minipage} \\
+\hline
+
+\rowcolor{rowwhite}
+Hypothèses de réussite &
+  \begin{minipage}[t]{\linewidth}
+    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
+      \item Les règles métiers sont bien respectées
+      \item Bonne mise en œuvre de la démarche DMAIC
+    \end{itemize}
+    \vspace{4pt}
+  \end{minipage} \\
+\hline
+
+\end{tabularx}
+\end{table}
+
+Le cahier des charges de ce projet se résume aux exigences fonctionnelles et techniques suivantes :
+
+\begin{itemize}
+    \item[$\bullet$] Les macros doivent fonctionner dans l'environnement CATIA V5 sans installation de logiciel tiers.
+    \item[$\bullet$] Chaque macro doit être autonome et pouvoir être exécutée indépendamment.
+    \item[$\bullet$] Les résultats doivent être présentés à l'utilisateur sous forme de rapport clair (boîte de dialogue ou fichier exporté).
+    \item[$\bullet$] Les macros doivent supporter les formats \texttt{.CATPart} (pièce) et \texttt{.CATProduct} (assemblage).
+    \item[$\bullet$] Le temps d'exécution doit rester acceptable même sur des assemblages de taille industrielle.
+\end{itemize}
+
+%% ---- II.5 Méthodologie de travail ----
+\subsection{Méthodologie de travail}
+
+\subsubsection{Choix de la démarche appropriée}
+
+Pour garantir le succès de ce projet, il est essentiel de sélectionner une méthodologie de travail adaptée permettant de gérer et de structurer les différentes étapes, depuis la définition du problème jusqu'à son analyse, puis la mise en œuvre de solutions. Parmi les approches couramment utilisées pour la résolution de problèmes dans l'industrie figurent le DMAIC, le PDCA et la méthode 8D. Ces méthodes peuvent être catégorisées selon deux critères principaux :
+
+\begin{itemize}
+    \item La taille du problème à résoudre (petite, moyenne ou grande).
+    \item La nature de la stratégie adoptée : s'il s'agit d'un processus d'amélioration continue ou de la résolution d'un problème spécifique.
+\end{itemize}
+
+À l'issue de cette analyse comparative, nous constatons que la démarche DMAIC est la plus adaptée à notre situation, compte tenu de la complexité du problème traité et de notre objectif d'amélioration à long terme.
+
+\subsubsection{Définition de la démarche DMAIC}
+
+DMAIC fait référence à un cycle visant à améliorer, optimiser et développer la conception au sein d'un service. Cette démarche est basée sur une approche structurée en cinq étapes ordonnancées selon une logique rigoureuse. Chaque lettre composant l'acronyme DMAIC correspond à l'initiale de la fonction de l'étape correspondante :
+
+\begin{itemize}
+    \item \mdseries{Define (Définir)} : consiste à définir clairement les objectifs du projet, les besoins des clients, les exigences et les contraintes.
+    \item \mdseries{Measure (Mesurer)} : consiste à rassembler les informations nécessaires pour traiter le sujet de façon objective, ainsi qu'à identifier les zones critiques.
+    \item \mdseries{Analyze (Analyser)} : vise à analyser les données collectées pour identifier les causes racines des problèmes et les opportunités d'amélioration.
+    \item \mdseries{Improve (Améliorer/Innover)} : porte sur le développement et la mise en œuvre de solutions dont les performances correspondent aux objectifs fixés.
+    \item \mdseries{Control (Contrôler/Vérifier)} : consiste à vérifier la performance et à suivre les résultats des solutions mises en œuvre afin de pérenniser les gains obtenus.
+\end{itemize}
+
+%% ---- II.6 Planification des tâches ----
+\subsection{Planification des tâches}
+
+La planification du projet s'étend sur une période de quatre mois, du 10 février au 10 juin 2026. Les différentes phases ont été organisées selon la méthodologie DMAIC adoptée. Le \autoref{tab:planification} présente la répartition des tâches principales.
+
+\begin{table}[H]
+\centering
+\caption{Planification des tâches du projet}
+\label{tab:planification}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}p{0.6cm}|>{\raggedright\arraybackslash}p{3.2cm}|X|>{\centering\arraybackslash}p{2.2cm}|>{\centering\arraybackslash}p{2.2cm}|}
+    \hline
+    \rowcolor{headerblue}
+    \textcolor{white}{\textbf{N°}} & \textcolor{white}{\textbf{Phase}} & \centering\textcolor{white}{\textbf{Tâches principales}} & \textcolor{white}{\textbf{Début}} & \textcolor{white}{\textbf{Fin}} \tabularnewline
+    \hline
+    \rowcolor{rowlight}
+    1 & Prise de contact & Intégration dans l'entreprise, découverte de l'environnement de travail et des outils & 10/02/2026 & 21/02/2026 \\
+    \hline
+    \rowcolor{rowwhite}
+    2 & Définir (\textit{Define}) & Cadrage du projet, rédaction de la charte, identification des besoins et des contraintes & 24/02/2026 & 14/03/2026 \\
+    \hline
+    \rowcolor{rowlight}
+    3 & Mesurer (\textit{Measure}) & Collecte et formalisation des règles métier, identification des critères de conformité critiques & 17/03/2026 & 04/04/2026 \\
+    \hline
+    \rowcolor{rowwhite}
+    4 & Analyser (\textit{Analyze}) & Analyse des causes racines des non-conformités, étude des solutions techniques possibles & 07/04/2026 & 25/04/2026 \\
+    \hline
+    \rowcolor{rowlight}
+    5 & Innover (\textit{Improve}) & Développement et implémentation des macros VBA/CATScript, tests unitaires & 28/04/2026 & 22/05/2026 \\
+    \hline
+    \rowcolor{rowwhite}
+    6 & Contrôler (\textit{Control}) & Validation sur cas réels, rédaction des rapports, amélioration continue & 25/05/2026 & 10/06/2026 \\
+    \hline
+\end{tabularx}
+\end{table}
