@@ -203,10 +203,10 @@ Dans le cadre de la conception assistée par ordinateur (CAO) au sein de Segula 
 Cette approche présente plusieurs limites majeures :
 
 \begin{itemize}
-    \item[$\bullet$] \textbf{Temps de vérification considérable :} le contrôle manuel d'un assemblage complexe peut prendre plusieurs heures, voire des jours, mobilisant des ressources humaines précieuses.
-    \item[$\bullet$] \textbf{Risque d'erreur humaine :} certaines non-conformités subtiles (auto-intersection, vrillage, nomenclature incorrecte) peuvent passer inaperçues lors d'une inspection visuelle.
-    \item[$\bullet$] \textbf{Manque de traçabilité :} en l'absence de rapports automatisés, il est difficile de suivre l'historique des contrôles et de garantir la reproductibilité des vérifications.
-    \item[$\bullet$] \textbf{Confidentialité des documents :} la complexité d'accès aux normes et spécifications clients rend la standardisation des contrôles encore plus difficile.
+    \item[�] \textbf{Temps de vérification considérable :} le contrôle manuel d'un assemblage complexe peut prendre plusieurs heures, voire des jours, mobilisant des ressources humaines précieuses.
+    \item[�] \textbf{Risque d'erreur humaine :} certaines non-conformités subtiles (auto-intersection, vrillage, nomenclature incorrecte) peuvent passer inaperçues lors d'une inspection visuelle.
+    \item[�] \textbf{Manque de traçabilité :} en l'absence de rapports automatisés, il est difficile de suivre l'historique des contrôles et de garantir la reproductibilité des vérifications.
+    \item[�] \textbf{Confidentialité des documents :} la complexité d'accès aux normes et spécifications clients rend la standardisation des contrôles encore plus difficile.
 \end{itemize}
 
 \textbf{La problématique centrale} de ce projet peut donc se formuler ainsi :
@@ -321,11 +321,11 @@ Hypothèses de réussite &
 Le cahier des charges de ce projet se résume aux exigences fonctionnelles et techniques suivantes :
 
 \begin{itemize}
-    \item[$\bullet$] Les macros doivent fonctionner dans l'environnement CATIA V5 sans installation de logiciel tiers.
-    \item[$\bullet$] Chaque macro doit être autonome et pouvoir être exécutée indépendamment.
-    \item[$\bullet$] Les résultats doivent être présentés à l'utilisateur sous forme de rapport clair (boîte de dialogue ou fichier exporté).
-    \item[$\bullet$] Les macros doivent supporter les formats \texttt{.CATPart} (pièce) et \texttt{.CATProduct} (assemblage).
-    \item[$\bullet$] Le temps d'exécution doit rester acceptable même sur des assemblages de taille industrielle.
+    \item[�] Les macros doivent fonctionner dans l'environnement CATIA V5 sans installation de logiciel tiers.
+    \item[�] Chaque macro doit être autonome et pouvoir être exécutée indépendamment.
+    \item[�] Les résultats doivent être présentés à l'utilisateur sous forme de rapport clair (boîte de dialogue ou fichier exporté).
+    \item[�] Les macros doivent supporter les formats \texttt{.CATPart} (pièce) et \texttt{.CATProduct} (assemblage).
+    \item[�] Le temps d'exécution doit rester acceptable même sur des assemblages de taille industrielle.
 \end{itemize}
 
 %% ---- II.5 Méthodologie de travail ----
@@ -354,38 +354,55 @@ DMAIC fait référence à un cycle visant à améliorer, optimiser et développe
     \item \mdseries{Control (Contrôler/Vérifier)} : consiste à vérifier la performance et à suivre les résultats des solutions mises en œuvre afin de pérenniser les gains obtenus.
 \end{itemize}
 
+\subsubsection{Outils utilisés}
+
+Pour mener à bien ce projet, plusieurs outils logiciels ont été mobilisés, chacun répondant à un besoin spécifique du cycle de développement.
+
+\paragraph{Conception et développement.}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[height=1.8cm]{Figures/tools/catia.png}\\[0.6em]
+    \mdseries{CATIA V5}\\
+    \textit{Modélisation 3D des pièces\\et exécution des macros}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[height=1.8cm]{Figures/tools/vs.png}\\[0.6em]
+    \mdseries{Visual Studio}\\
+    \textit{Développement et débogage\\des macros VBA / CATScript}
+\end{minipage}
+\end{figure}
+
+\paragraph{Analyse des données.}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[height=1.8cm]{Figures/tools/excel.png}\\[0.6em]
+    \mdseries{Microsoft Excel}\\
+    \textit{Manipulation des données\\et rapports de conformité}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[height=1.8cm]{Figures/tools/latex.png}\\[0.6em]
+    \mdseries{\LaTeX}\\
+    \textit{Rédaction structurée du rapport\\avec gestion automatique des références}
+\end{minipage}
+\end{figure}
+
 %% ---- II.6 Planification des tâches ----
 \subsection{Planification des tâches}
 
-La planification du projet s'étend sur une période de quatre mois, du 10 février au 10 juin 2026. Les différentes phases ont été organisées selon la méthodologie DMAIC adoptée. Le \autoref{tab:planification} présente la répartition des tâches principales.
+La planification du projet s'étend sur une période de quatre mois, du 10 février au 10 juin 2026. Les différentes phases ont été organisées selon la méthodologie DMAIC adoptée.
 
-\begin{table}[H]
-\centering
-\caption{Planification des tâches du projet}
-\label{tab:planification}
-\renewcommand{\arraystretch}{1.4}
-\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}p{0.6cm}|>{\raggedright\arraybackslash}p{3.2cm}|X|>{\centering\arraybackslash}p{2.2cm}|>{\centering\arraybackslash}p{2.2cm}|}
-    \hline
-    \rowcolor{headerblue}
-    \textcolor{white}{\textbf{N°}} & \textcolor{white}{\textbf{Phase}} & \centering\textcolor{white}{\textbf{Tâches principales}} & \textcolor{white}{\textbf{Début}} & \textcolor{white}{\textbf{Fin}} \tabularnewline
-    \hline
-    \rowcolor{rowlight}
-    1 & Prise de contact & Intégration dans l'entreprise, découverte de l'environnement de travail et des outils & 10/02/2026 & 21/02/2026 \\
-    \hline
-    \rowcolor{rowwhite}
-    2 & Définir (\textit{Define}) & Cadrage du projet, rédaction de la charte, identification des besoins et des contraintes & 24/02/2026 & 14/03/2026 \\
-    \hline
-    \rowcolor{rowlight}
-    3 & Mesurer (\textit{Measure}) & Collecte et formalisation des règles métier, identification des critères de conformité critiques & 17/03/2026 & 04/04/2026 \\
-    \hline
-    \rowcolor{rowwhite}
-    4 & Analyser (\textit{Analyze}) & Analyse des causes racines des non-conformités, étude des solutions techniques possibles & 07/04/2026 & 25/04/2026 \\
-    \hline
-    \rowcolor{rowlight}
-    5 & Innover (\textit{Improve}) & Développement et implémentation des macros VBA/CATScript, tests unitaires & 28/04/2026 & 22/05/2026 \\
-    \hline
-    \rowcolor{rowwhite}
-    6 & Contrôler (\textit{Control}) & Validation sur cas réels, rédaction des rapports, amélioration continue & 25/05/2026 & 10/06/2026 \\
-    \hline
-\end{tabularx}
-\end{table}
+% TODO : Insérer ici le diagramme de Gantt (image Microsoft Project)
+\begin{center}
+    \textit{[Diagramme de Gantt à insérer]}
+    % \includegraphics[width=\textwidth]{Figures/gantt.png}
+\end{center}

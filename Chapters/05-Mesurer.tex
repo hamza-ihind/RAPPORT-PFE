@@ -14,11 +14,11 @@ Une convention de nommage est un ensemble de règles permettant d'attribuer des 
 
 La convention retenue pour ce projet suit le format \texttt{XXX-0000}, où \texttt{XXX} représente exactement trois lettres majuscules (code famille ou département), suivi d'un tiret séparateur, puis de trois ou quatre chiffres de séquencement. Par exemple, \texttt{MEC-001} et \texttt{ASS-1234} sont des noms conformes, tandis que \texttt{mec-001} (minuscules), \texttt{MEC001} (absence de tiret) ou \texttt{MEC-001A} (caractère supplémentaire) sont rejetés.
 
-\section{Algorithme de vérification}
+\subsection{Algorithme de vérification}
 
 L'algorithme implémenté dans la macro VBA contrôle automatiquement la conformité des noms de pièces et d'assemblages CATIA. Il repose sur la détection du type de document actif, l'utilisation d'une expression régulière pour valider le format, un parcours récursif pour inspecter tous les niveaux d'un assemblage, et la génération d'un rapport de non-conformités.
 
-\subsection{Pseudocode de l'algorithme}
+\subsubsection{Pseudocode de l'algorithme}
 
 % TODO : Insérer ici la capture d'écran du pseudocode / code VBA
 \begin{center}
@@ -26,16 +26,16 @@ L'algorithme implémenté dans la macro VBA contrôle automatiquement la conform
     % \includegraphics[width=\textwidth]{Figures/pseudocode-nommage.png}
 \end{center}
 
-\section{Étapes de la macro}
+\subsection{Étapes de la macro}
 
 Les principales étapes de fonctionnement de la macro sont les suivantes :
 
 \begin{itemize}
-    \item[$\bullet$] \textbf{Récupération du document actif :} la macro accède au document ouvert dans CATIA via \texttt{CATIA.ActiveDocument}.
-    \item[$\bullet$] \textbf{Identification du type de document :} distinction entre \texttt{PartDocument} (pièce) et \texttt{ProductDocument} (assemblage) à l'aide de \texttt{TypeName()}.
-    \item[$\bullet$] \textbf{Validation du nom (pièce) :} le nom de la pièce est extrait et comparé au pattern \texttt{\textasciicircum[A-Z]\{3\}-\textbackslash d\{3,4\}\$} via une expression régulière.
-    \item[$\bullet$] \textbf{Parcours récursif (assemblage) :} pour un assemblage, la macro inspecte récursivement chaque sous-produit et valide son \texttt{PartNumber}.
-    \item[$\bullet$] \textbf{Génération du rapport :} les noms non conformes sont collectés et affichés dans un message récapitulatif à l'utilisateur.
+    \item[�] \textbf{Récupération du document actif :} la macro accède au document ouvert dans CATIA via \texttt{CATIA.ActiveDocument}.
+    \item[�] \textbf{Identification du type de document :} distinction entre \texttt{PartDocument} (pièce) et \texttt{ProductDocument} (assemblage) à l'aide de \texttt{TypeName()}.
+    \item[�] \textbf{Validation du nom (pièce) :} le nom de la pièce est extrait et comparé au pattern \texttt{\textasciicircum[A-Z]\{3\}-\textbackslash d\{3,4\}\$} via une expression régulière.
+    \item[�] \textbf{Parcours récursif (assemblage) :} pour un assemblage, la macro inspecte récursivement chaque sous-produit et valide son \texttt{PartNumber}.
+    \item[�] \textbf{Génération du rapport :} les noms non conformes sont collectés et affichés dans un message récapitulatif à l'utilisateur.
 \end{itemize}
 
 % TODO : Insérer ici le schéma visuel illustrant le flux de la macro
@@ -44,236 +44,53 @@ Les principales étapes de fonctionnement de la macro sont les suivantes :
     % \includegraphics[width=\textwidth]{Figures/schema-macro-nommage.png}
 \end{center}
 
-\section{Critères de qualité surfacique et macros de détection}
-
-Cette section présente les défauts surfaciques critiques identifiés lors de la phase de mesure, ainsi que les macros Q-Checker développées pour automatiser leur détection. Pour chaque défaut, nous exposons sa définition, ses fondements mathématiques, sa justification métier, puis l'algorithme de vérification associé.
-
 %% ============================================================
 %%  AUTO-INTERSECTION
 %% ============================================================
-\subsection{Auto-intersection (Offset Clipping)}
+\section{Auto-intersection (Offset Clipping)}
 
-\subsubsection{Définition et fondements mathématiques}
+%% --- Section 1 : Définition & fondements mathématiques ---
+\subsection{Définition et fondements mathématiques}
 
-L'auto-intersection (ou \textit{Offset Clipping}) survient lors d'une opération de création d'épaisseur (\textit{Thick Surface}) ou de décalage (\textit{Offset}) sur une géométrie complexe. La nouvelle surface générée se croise alors elle-même, créant une boucle de matière incohérente.
+L'\textbf{auto-intersection} (également appelée \textit{Offset Clipping}) est un défaut topologique qui survient lorsqu'une surface se croise elle-même dans l'espace 3D. Concrètement, deux zones distinctes de la surface viennent occuper la même position géométrique, créant une boucle de matière incohérente. Ce phénomène est couramment rencontré lors des opérations de création d'épaisseur (\textit{Thick Surface}) ou de décalage (\textit{Offset}) sur des géométries complexes telles que les congés serrés, les nervures fines ou les surfaces à forte courbure.
 
-Mathématiquement, la surface décalée $S_d$ est définie par :
+\paragraph{Rayon de courbure et surface décalée.}
+Lors d'une opération d'\textit{Offset} ou de \textit{Thick Surface}, la surface décalée $S_d$ est obtenue en déplaçant chaque point de la surface d'origine le long de sa normale unitaire $\mathbf{n}$ :
+
 \begin{equation*}
     S_d(u,v) = S(u,v) + d \cdot \mathbf{n}(u,v)
 \end{equation*}
-où $d$ est l'épaisseur et $\mathbf{n}$ la normale unitaire. La condition de validité impose que le rayon de courbure minimal ($R_{min}$) soit strictement supérieur à l'épaisseur appliquée :
+
+où $d$ est l'épaisseur (ou la distance de décalage). La validité géométrique de cette opération repose sur une condition simple : le \textbf{rayon de courbure minimal} $R_{\min}$ de la surface d'origine doit rester strictement supérieur à l'épaisseur appliquée :
+
 \begin{equation*}
-    R_{min} > d
+    \boxed{R_{\min} > d}
 \end{equation*}
-Lorsque $d \ge R_{min}$, le centre de courbure est dépassé, la normale s'inverse et la topologie devient \textit{Non-Manifold}.
+
+Physiquement, le rayon de courbure mesure le « degré de cambrage » local de la surface. Plus une zone est courbée, plus son rayon de courbure est petit. Lorsque l'épaisseur $d$ atteint ou dépasse $R_{\min}$, le point décalé franchit le centre de courbure : la normale s'inverse localement et la surface générée se replie sur elle-même. La topologie devient alors \textbf{Non-Manifold} --- c'est l'auto-intersection.
+
+%% --- Section 2 : Condition d'auto-intersection ---
+\subsection{Condition d'auto-intersection}
+
+En termes simples, une surface présente une auto-intersection lorsque deux zones distinctes de cette surface se retrouvent au même endroit dans l'espace 3D. La surface « se traverse elle-même » en formant une \textbf{courbe d'auto-intersection}. Dans le cas courant du décalage, cette situation se produit précisément lorsque $d \ge R_{\min}$ : la surface décalée se croise dans les zones de forte courbure, comme illustré dans la \autoref{fig:self_intersection}.
 
 \begin{figure}[hbt!]
     \centering
     \includegraphics[width=0.45\textwidth]{Figures/self-intersection/self-intersection.png}
     \hfill
     \includegraphics[width=0.45\textwidth]{Figures/self-intersection/self-intersection-2.jpg}
-    \caption{Illustration du phénomène d'auto-intersection sur une surface complexe.}
+    \caption{Auto-intersection sur une surface décalée : la zone de forte courbure provoque un repliement de la surface sur elle-même.}
     \label{fig:self_intersection}
 \end{figure}
 
-\subsubsection{Justification métier : pourquoi détecter ce défaut ?}
+%% --- Section 3 : Justification métier ---
+\subsection{Justification métier}
 
-Même si CATIA parvient parfois à générer la face, celle-ci reste techniquement inexploitable en aval :
-
-\begin{itemize}
-    \item[$\bullet$] \textbf{Fabrication (FAO) :} les trajectoires d'outil CNC échouent ou provoquent des collisions face à une matière croisée.
-    \item[$\bullet$] \textbf{Simulation (FEA) :} le maillage volumique devient impossible, rendant les résultats de résistance ou de crash-test invalides.
-    \item[$\bullet$] \textbf{Impression 3D :} le \textit{Slicing} ne parvient plus à distinguer l'intérieur de l'extérieur du volume.
-\end{itemize}
-
-La détection automatisée de ce défaut est donc indispensable pour garantir la fabricabilité des pièces dès la phase de conception.
-
-\subsubsection{Pseudocode de l'algorithme}
-
-% TODO : Insérer ici la capture d'écran du pseudocode / code VBA
-\begin{center}
-    \textit{[Image du pseudocode de la macro auto-intersection à insérer]}
-    % \includegraphics[width=\textwidth]{Figures/pseudocode-auto-intersection.png}
-\end{center}
-
-\subsubsection{Étapes de la macro}
-
-\begin{itemize}
-    \item[$\bullet$] \textbf{Sélection de la cible :} la macro identifie l'objet \texttt{HybridShape} (surface) dans le document actif.
-    \item[$\bullet$] \textbf{Mesure du rayon de courbure :} appel de la méthode \texttt{GetMinimumCurvatureRadius()} sur la surface.
-    \item[$\bullet$] \textbf{Comparaison au seuil :} le rayon mesuré est comparé à l'épaisseur standard du projet ($d$).
-    \item[$\bullet$] \textbf{Génération de l'alerte :} si $R_{min} \le d$, la pièce est signalée comme \textit{Non-Manufacturable}.
-\end{itemize}
-
-% TODO : Insérer ici l'illustration visuelle des étapes de la macro
-\begin{center}
-    \textit{[Illustration visuelle des étapes à insérer]}
-    % \includegraphics[width=\textwidth]{Figures/etapes-macro-auto-intersection.png}
-\end{center}
-
-\subsubsection{Organigramme de la macro}
-
-% TODO : Insérer ici le flowchart de la macro auto-intersection
-\begin{center}
-    \textit{[Organigramme (flowchart) de la macro à insérer]}
-    % \includegraphics[width=0.8\textwidth]{Figures/flowchart-auto-intersection.png}
-\end{center}
-
-%% ============================================================
-%%  VRILLAGE
-%% ============================================================
-\subsection{Vrillage (Auto-repliement)}
-
-\subsubsection{Définition et fondements mathématiques}
-
-Le vrillage (ou \textit{auto-repliement}) est une anomalie topologique majeure survenant lors de la génération de surfaces complexes via les fonctions de balayage (\textit{Sweep}) ou de surfaces multi-sections. Il se traduit par une inversion locale de la matière où la surface se croise elle-même.
-
-Pour qu'une surface $\mathbf{S}(u,v)$ soit valide, sa paramétrisation doit être régulière. Le déterminant du Jacobien ($J$) traduit cette régularité :
-\begin{equation*}
-    J(u,v) = \left\| \frac{\partial \mathbf{S}}{\partial u} \times \frac{\partial \mathbf{S}}{\partial v} \right\|
-\end{equation*}
-
-\begin{itemize}
-    \item[$\bullet$] \textbf{Surface saine :} $J(u,v) > 0$ sur l'ensemble du domaine paramétrique.
-    \item[$\bullet$] \textbf{Vrillage :} apparaît lorsque $J(u,v) \le 0$. La surface perd alors sa propriété de variété (\textit{manifold}) ; les vecteurs tangents deviennent colinéaires, provoquant un effondrement géométrique.
-\end{itemize}
-
-Trois causes racines génèrent ce défaut en CAO :
-\begin{itemize}
-    \item[$\bullet$] \textbf{Défaut de couplage :} mauvaise correspondance des points de fermeture (\textit{Closing Points}) entre sections.
-    \item[$\bullet$] \textbf{Conflit de tangence :} vecteurs de tangence opposés aux extrémités forçant une boucle.
-    \item[$\bullet$] \textbf{Saturation de l'épine (\textit{Spine}) :} rayon de courbure de la courbe guide inférieur à la demi-largeur de la section balayée.
-\end{itemize}
-
-\subsubsection{Justification métier : pourquoi détecter ce défaut ?}
-
-Le vrillage constitue un critère d'exclusion lors du \textit{Q-Checking} :
-
-\begin{itemize}
-    \item[$\bullet$] \textbf{Maillage (FEA) :} les solveurs ne peuvent pas traiter des faces auto-pénétrantes, entraînant un échec de simulation.
-    \item[$\bullet$] \textbf{Usinage (FAO) :} les normales erronées provoquent des collisions d'outil ou des trajectoires impossibles.
-    \item[$\bullet$] \textbf{Qualité perçue (Class A) :} rupture brutale des lignes de reflet (zébras), inacceptable en carrosserie.
-\end{itemize}
-
-La macro de détection permet d'identifier ces zones critiques avant toute transmission aux métiers aval.
-
-\subsubsection{Pseudocode de l'algorithme}
-
-% TODO : Insérer ici la capture d'écran du pseudocode / code VBA
-\begin{center}
-    \textit{[Image du pseudocode de la macro vrillage à insérer]}
-    % \includegraphics[width=\textwidth]{Figures/pseudocode-vrillage.png}
-\end{center}
-
-\subsubsection{Étapes de la macro}
-
-\begin{itemize}
-    \item[$\bullet$] \textbf{Discrétisation :} balayage de la surface sur une grille de points $P_{i,j}$.
-    \item[$\bullet$] \textbf{Calcul des normales :} extraction du vecteur unitaire $\mathbf{n}_{i,j}$ en chaque point.
-    \item[$\bullet$] \textbf{Test d'inversion :} si $\mathbf{n}_{i,j} \cdot \mathbf{n}_{i+1,j} < 0$, une inversion de normale est détectée.
-    \item[$\bullet$] \textbf{Verdict :} la zone est identifiée comme \textit{Twisted Surface} et la validation du modèle est bloquée.
-\end{itemize}
-
-% TODO : Insérer ici l'illustration visuelle des étapes de la macro
-\begin{center}
-    \textit{[Illustration visuelle des étapes à insérer]}
-    % \includegraphics[width=\textwidth]{Figures/etapes-macro-vrillage.png}
-\end{center}
-
-\subsubsection{Organigramme de la macro}
-
-% TODO : Insérer ici le flowchart de la macro vrillage
-\begin{center}
-    \textit{[Organigramme (flowchart) de la macro à insérer]}
-    % \includegraphics[width=0.8\textwidth]{Figures/flowchart-vrillage.png}
-\end{center}
-
-\section{Solutions proposées : Partie surfacique}
-
-Cette partie se concentre sur les critères de qualité surfacique que nous devons contrôler automatiquement via des macros (outils Q-Checker métier). Dans un premier temps, nous abordons la détection de l'auto-intersection.
-
-\subsection{Auto-intersection}
-
-\subsubsection{Définition du Phénomène}
-
-L'\textbf{auto-intersection} survient lorsqu'une surface se croise elle-même dans l'espace 3D, c'est-à-dire lorsque deux zones distinctes du domaine paramétrique de la surface correspondent au même point géométrique. Ce phénomène constitue un défaut topologique majeur, couramment rencontré lors des opérations de création d'épaisseur (\textit{Thick Surface}) ou de décalage (\textit{Offset}) sur des géométries complexes.
-
-\subsubsection{Représentation Paramétrique d'une Surface}
-
-Dans CATIA V5, les surfaces sont modélisées en tant que surfaces NURBS (\textit{Non-Uniform Rational B-Splines}). Une surface est une application paramétrique qui associe à chaque couple $(u, v)$ un point 3D :
-
-\begin{equation*}
-    S : D \subset \mathbb{R}^2 \longrightarrow \mathbb{R}^3 \qquad (u, v) \longmapsto S(u, v) = \big( x(u,v),\; y(u,v),\; z(u,v) \big)
-\end{equation*}
-
-Le domaine paramétrique $D$ est un rectangle dans le plan UV :
-
-\begin{equation*}
-    D = [u_{\min},\; u_{\max}] \times [v_{\min},\; v_{\max}]
-\end{equation*}
-
-Les principaux paramètres qui définissent une surface NURBS sont présentés dans le \autoref{tab:params-nurbs}.
+Même lorsque CATIA parvient à générer la face décalée, celle-ci reste \textbf{techniquement inexploitable} par les métiers aval. La détection précoce de ce défaut est donc indispensable pour éviter des reprises coûteuses. Le \autoref{tab:impacts-auto-intersection} détaille les conséquences par domaine.
 
 \begin{table}[H]
     \centering
-    \caption{Paramètres d'une surface NURBS}
-    \label{tab:params-nurbs}
-    \begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}p{2.5cm}|X|}
-        \hline
-        \rowcolor{headerblue}
-        \textcolor{white}{\textbf{Symbole}} & \centering\textcolor{white}{\textbf{Signification}} \tabularnewline
-        \hline
-        \rowcolor{rowlight}
-        $P_{ij}$ & Points de contrôle (grille 3D qui « sculpte » la forme) \\
-        \hline
-        \rowcolor{rowwhite}
-        $w_{ij}$ & Poids associés à chaque point de contrôle \\
-        \hline
-        \rowcolor{rowlight}
-        $N_{i,p}(u)$ & Fonctions de base B-spline de degré $p$ en direction $u$ \\
-        \hline
-        \rowcolor{rowwhite}
-        $N_{j,q}(v)$ & Fonctions de base B-spline de degré $q$ en direction $v$ \\
-        \hline
-    \end{tabularx}
-\end{table}
-
-\subsubsection{Condition Formelle d'Auto-intersection}
-
-Une surface $S$ présente une auto-intersection s'il existe deux couples de paramètres distincts qui correspondent au même point 3D :
-
-\begin{equation*}
-    \exists\; (u_1, v_1) \neq (u_2, v_2) \in D \quad \text{tels que} \quad S(u_1, v_1) = S(u_2, v_2)
-\end{equation*}
-
-En d'autres termes, deux zones différentes de la surface occupent la même position dans l'espace. La surface « se traverse elle-même » en formant une courbe d'auto-intersection.
-
-\subsubsection{Fondements Mathématiques du Décalage}
-
-Le succès d'un épaississement dépend de la relation entre la géométrie locale et la distance de décalage :
-
-\begin{itemize}
-    \item[•] \textbf{Vecteur Normal :} La surface décalée $S_d$ est définie par :
-    \begin{equation*}
-        S_d(u,v) = S(u,v) + d \cdot \mathbf{n}(u,v)
-    \end{equation*}
-    \textit{Où $d$ est l'épaisseur et $\mathbf{n}$ est la normale unitaire.}
-
-    \item[•] \textbf{La Condition de Validité :} Pour éviter toute singularité ou auto-intersection, le rayon de courbure minimal ($R_{\min}$) de la surface support doit être strictement supérieur à l'épaisseur ($d$) appliquée :
-    \begin{equation*}
-        R_{\min} > d
-    \end{equation*}
-
-    \item[•] \textbf{Le Point de Rupture :} Si $d \ge R_{\min}$, le centre de courbure est « dépassé », la normale s'inverse et la topologie devient \textbf{Non-Manifold}.
-\end{itemize}
-
-\subsubsection{Impacts Industriels}
-
-L'auto-intersection constitue un défaut critique dans la chaîne numérique. Même si CATIA parvient parfois à générer la face, celle-ci est techniquement inexploitable. Le \autoref{tab:impacts-auto-intersection} résume les conséquences par domaine.
-
-\begin{table}[H]
-    \centering
-    \caption{Conséquences industrielles de l'auto-intersection}
+    \caption{Conséquences industrielles de l'auto-intersection par domaine métier}
     \label{tab:impacts-auto-intersection}
     \begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{3.8cm}|X|}
         \hline
@@ -281,83 +98,123 @@ L'auto-intersection constitue un défaut critique dans la chaîne numérique. M�
         \textcolor{white}{\textbf{Domaine}} & \centering\textcolor{white}{\textbf{Conséquence}} \tabularnewline
         \hline
         \rowcolor{rowlight}
-        Épaississement / Offset & \textit{ThickSurface} échoue : CATIA ne peut pas calculer un solide cohérent \\
+        Fabrication assistée par ordinateur (FAO) & Les trajectoires d'outils CNC échouent ou génèrent des collisions face à une matière qui se croise elle-même. L'usinage devient imprévisible et potentiellement dangereux. \\
         \hline
         \rowcolor{rowwhite}
-        Maillage EF (FEA) & Éléments finis dégénérés $\rightarrow$ résultats de simulation incorrects \\
+        Simulation par éléments finis (FEA) & Le maillage volumique ne peut pas être généré correctement sur une géométrie auto-intersectante : les éléments finis deviennent dégénérés, rendant les simulations invalides. \\
         \hline
         \rowcolor{rowlight}
-        Usinage CNC & Trajectoires d'outils croisées $\rightarrow$ collisions ou enlèvements non désirés \\
-        \hline
-        \rowcolor{rowwhite}
-        Injection plastique & Contre-dépouilles impossibles à démouler dans le moule \\
-        \hline
-        \rowcolor{rowlight}
-        Échange de données & Risque de corruption géométrique lors d'import/export STEP ou IGES \\
+        Injection plastique & Les contre-dépouilles créées par l'auto-intersection rendent le démoulage impossible sans modification de l'outillage. \\
         \hline
     \end{tabularx}
 \end{table}
 
 \begin{block}[note]
-Dans l'industrie automobile, un défaut d'auto-intersection détecté tardivement (après livraison des outillages) peut engendrer des coûts de reprise de plusieurs dizaines de milliers d'euros. D'où l'importance d'une détection automatisée en amont.
+Dans l'industrie automobile, un défaut d'auto-intersection détecté tardivement --- après la livraison des outillages --- peut engendrer des coûts de reprise de plusieurs dizaines de milliers d'euros. D'où l'importance d'une détection automatisée dès la phase de conception.
 \end{block}
 
-\subsubsection{Méthode de Détection : la Technique « Try-to-Join »}
+%% --- Section 4 : Méthode de détection --- 
+\subsection{Méthode de détection : la technique « Try-to-Join »}
 
-CATIA V5 ne propose aucune méthode API directe du type \texttt{Surface.IsSelfIntersecting()}. L'outil interactif « Face Checker » existe, mais il n'est pas exposé dans l'API d'automatisation VBA/CATScript. La solution adoptée est la technique \textbf{Try-to-Join}, qui consiste à :
+L'API CATIA V5 ne fournit aucune fonction directe de type \texttt{Surface.IsSelfIntersecting()}. L'outil interactif \textit{Face Checker}, disponible dans le module \textit{Generative Shape Design}, permet certes de visualiser les auto-intersections, mais il n'est pas exposé dans l'API d'automatisation VBA/CATScript. Il est donc inutilisable dans une macro Q-Checker.
+
+\paragraph{Principe de la technique.}
+La solution retenue repose sur une approche indirecte baptisée \textbf{Try-to-Join}. L'idée est d'exploiter le fait que le noyau géométrique CGM de Dassault Systèmes effectue systématiquement un contrôle d'auto-intersection lors de toute opération topologique. Le principe se décompose en trois étapes :
+
+\begin{enumerate}
+    \item \textbf{Création d'un Join temporaire} --- La macro crée un objet \texttt{HybridShapeAssemble} (opération \textit{Join}) en prenant la surface cible comme unique entrée. Cette opération est ajoutée au \textit{HybridBody} du document.
+    \item \textbf{Mise à jour forcée} --- L'appel à \texttt{Part.UpdateObject} déclenche le recalcul du Join par le noyau CGM. C'est à cette étape que le noyau effectue ses vérifications topologiques internes.
+    \item \textbf{Capture du verdict} --- Si la surface est saine, le Join se calcule sans erreur. Si une auto-intersection est présente, le noyau CGM lève une exception que le bloc \texttt{On Error} de la macro intercepte. La surface est alors marquée comme défaillante.
+\end{enumerate}
+
+Cette technique transforme donc une \textbf{absence de fonction API} en un test fiable en s'appuyant sur les contrôles internes du noyau géométrique.
+
+\paragraph{Avantages de l'approche.}
+La technique Try-to-Join présente plusieurs atouts par rapport à une implémentation manuelle de détection :
 
 \begin{itemize}
-    \item[•] Créer un \textit{Join} (\texttt{HybridShapeAssemble}) sur la surface cible.
-    \item[•] Forcer le recalcul via \texttt{Part.UpdateObject}.
-    \item[•] Capturer l'erreur retournée par le noyau CGM en cas d'auto-intersection.
+    \item[•] \textbf{Aucune dépendance externe :} elle utilise uniquement les objets natifs de CATIA, sans bibliothèque tierce.
+    \item[•] \textbf{Fiabilité du noyau CGM :} le contrôle est délégué au même moteur géométrique que celui utilisé par les opérations de modélisation, garantissant une cohérence avec le comportement de CATIA.
+    \item[•] \textbf{Simplicité d'implémentation :} quelques lignes de code VBA suffisent à mettre en place le test.
+    \item[•] \textbf{Nettoyage automatique :} le Join temporaire est supprimé après le test, ne laissant aucune trace dans l'arbre de spécifications.
 \end{itemize}
 
-\paragraph{Étapes internes du noyau CGM.}
-Lorsque \texttt{Part.UpdateObject} est appelé, le noyau géométrique CGM de Dassault Systèmes effectue les opérations détaillées dans le \autoref{tab:etapes-cgm}.
+%% --- Section 5 : Pipeline CGM interne ---
+\subsection{Pipeline interne du noyau CGM}
+
+Pour mieux comprendre ce qui se passe « sous le capot » lors de l'appel à \texttt{Part.UpdateObject}, il est utile de décrire le pipeline de vérification exécuté par le noyau géométrique CGM (\textit{Convergence Geometric Modeler}) de Dassault Systèmes. Ce pipeline, résumé dans le \autoref{tab:etapes-cgm}, enchaîne six opérations successives allant de la discrétisation grossière jusqu'à la confirmation exacte de l'intersection.
 
 \begin{table}[H]
     \centering
-    \caption{Pipeline de vérification du noyau CGM}
+    \caption{Pipeline de vérification d'auto-intersection du noyau CGM (6 étapes)}
     \label{tab:etapes-cgm}
-    \begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}p{1cm}|>{\bfseries\raggedright\arraybackslash}p{3.5cm}|X|}
+    \begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}p{0.8cm}|>{\bfseries\raggedright\arraybackslash}p{3.2cm}|X|}
         \hline
         \rowcolor{headerblue}
         \textcolor{white}{\textbf{N°}} & \textcolor{white}{\textbf{Opération}} & \centering\textcolor{white}{\textbf{Description}} \tabularnewline
         \hline
         \rowcolor{rowlight}
-        1 & Tessellation & La surface NURBS est discrétisée en un maillage de triangles par évaluation de $S(u,v)$ sur une grille régulière. \\
+        1 & Tessellation & La surface est découpée en un maillage de petits triangles. Cette approximation facettée permet de travailler avec des géométries plus simples pour les étapes suivantes. \\
         \hline
         \rowcolor{rowwhite}
-        2 & Construction BVH & Chaque triangle est enfermé dans une boîte englobante (AABB). Un arbre binaire hiérarchique est construit pour réduire la complexité de $O(n^2)$ à $O(n \log n)$. \\
+        2 & Construction de l'arbre BVH & Chaque triangle est enfermé dans une boîte englobante alignée sur les axes (AABB). Ces boîtes sont organisées dans un arbre hiérarchique binaire (\textit{Bounding Volume Hierarchy}), ce qui permet de réduire la complexité des tests d'intersection de $O(n^2)$ à $O(n \log n)$. \\
         \hline
         \rowcolor{rowlight}
-        3 & Test Triangle-Triangle & Pour chaque paire de triangles dont les boîtes se chevauchent, un test d'intersection géométrique exact est réalisé (calcul de plans et intervalles de projection). \\
+        3 & Test triangle--triangle & Pour chaque paire de triangles dont les boîtes englobantes se chevauchent, un test d'intersection géométrique exact est effectué. Ce test repose sur le calcul des plans supports des triangles et la vérification des intervalles de projection. \\
         \hline
         \rowcolor{rowwhite}
-        4 & Filtrage des adjacences & Les triangles voisins partageant une arête sont exclus car leur contact est normal. \\
+        4 & Filtrage des adjacences & Les paires de triangles qui partagent une arête ou un sommet sont automatiquement exclues : leur contact est un voisinage normal et non une intersection. Ce filtrage élimine les faux positifs liés à la connectivité du maillage. \\
         \hline
         \rowcolor{rowlight}
-        5 & Raffinement NURBS & Si des candidats sont trouvés, le noyau résout le système $S(u_1,v_1) - S(u_2,v_2) = \mathbf{0}$ par la méthode de Newton-Raphson pour confirmer l'intersection. \\
+        5 & Raffinement exact & Lorsque des candidats à l'intersection subsistent après le filtrage, le noyau revient à la représentation mathématique exacte de la surface pour confirmer ou infirmer l'intersection avec une très haute précision (de l'ordre de $10^{-7}$~mm). \\
         \hline
         \rowcolor{rowwhite}
-        6 & Signalement d'erreur & Si une solution $(u_1^*,v_1^*) \neq (u_2^*,v_2^*)$ est trouvée, une erreur topologique est levée et capturée par le bloc \texttt{On Error}. \\
+        6 & Signalement d'erreur & Si une intersection est confirmée, le noyau lève une erreur topologique. Cette erreur est propagée jusqu'à la couche VBA et capturée par le bloc \texttt{On Error} de la macro, permettant d'identifier la surface fautive. \\
         \hline
     \end{tabularx}
 \end{table}
 
-\subsubsection{Stratégies de Correction}
+Ce pipeline illustre la stratégie « du grossier au fin » (\textit{coarse-to-fine}) adoptée par CGM : les premières étapes éliminent rapidement la majorité des zones saines grâce à des tests peu coûteux (boîtes englobantes), et seules les zones suspectes font l'objet d'un calcul exact. Cette approche garantit un bon compromis entre \textbf{performance} et \textbf{précision}.
 
-Dès qu'une auto-intersection est repérée, plusieurs stratégies peuvent être envisagées pour la résoudre :
+%% --- Section 6 : Stratégies de correction ---
+\subsection{Stratégies de correction}
 
-\begin{itemize}
-    \item[•] \textbf{Augmentation du Rayon :} Modifier les congés (\textit{Fillets}) pour que $R > d$.
-    \item[•] \textbf{Healing Assistant :} Utiliser les outils de lissage pour éliminer les micro-variations de courbure.
-    \item[•] \textbf{Découpe locale :} Supprimer la zone de conflit et reconstruire une transition propre via un \textit{Multi-sections Surface} ou un \textit{Blend}.
-\end{itemize}
+Lorsqu'une auto-intersection est détectée par la macro, le concepteur doit intervenir sur la géométrie pour restaurer une topologie valide. Le choix de la stratégie dépend de la localisation du défaut, de la complexité de la surface et des contraintes fonctionnelles de la pièce. Le \autoref{tab:strategies-correction} présente les principales approches de correction utilisées en pratique.
 
-\subsubsection{Limites et Perspectives}
+\begin{table}[H]
+    \centering
+    \caption{Stratégies de correction d'une auto-intersection}
+    \label{tab:strategies-correction}
+    \begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{3.5cm}|X|>{\centering\arraybackslash}p{2.5cm}|}
+        \hline
+        \rowcolor{headerblue}
+        \textcolor{white}{\textbf{Stratégie}} & \centering\textcolor{white}{\textbf{Description}} & \textcolor{white}{\textbf{Cas d'usage}} \tabularnewline
+        \hline
+        \rowcolor{rowlight}
+        Augmentation du rayon de congé & Augmenter les rayons des congés (\textit{Fillets}) dans la zone de conflit afin de respecter la condition $R_{\min} > d$. C'est la correction la plus directe lorsque le défaut provient d'un congé trop serré par rapport à l'épaisseur. & Congés serrés \\
+        \hline
+        \rowcolor{rowwhite}
+        Réduction de l'épaisseur locale & Diminuer la valeur de décalage $d$ dans la zone concernée, ou appliquer un offset variable si le cahier des charges le permet. & Épaisseur excessive \\
+        \hline
+        \rowcolor{rowlight}
+        Healing / Lissage de courbure & Utiliser le \textit{Healing Assistant} ou l'outil \textit{Curve Smooth} de CATIA pour éliminer les micro-variations de courbure locales qui provoquent des pics de courbure sous le seuil $R_{\min}$. & Micro-défauts \\
+        \hline
+        \rowcolor{rowwhite}
+        Découpe et reconstruction locale & Supprimer la zone de conflit et reconstruire la transition via un \textit{Multi-sections Surface}, un \textit{Blend} ou un \textit{Fill}. Cette approche offre un contrôle total sur la géométrie résultante. & Défauts localisés \\
+        \hline
+        \rowcolor{rowlight}
+        Simplification géométrique & Remplacer une surface complexe (multi-congés, raccords G2) par une géométrie plus simple tout en respectant les tolérances fonctionnelles. & Géométries trop complexes \\
+        \hline
+    \end{tabularx}
+\end{table}
 
-Le \autoref{tab:limites-auto-intersection} résume les principales limites identifiées dans la détection automatisée de l'auto-intersection.
+En pratique, la correction suit une logique de \textbf{moindre modification} : on privilégie d'abord les ajustements paramétriques simples (augmentation de rayon, réduction d'épaisseur) avant de recourir à une reconstruction locale, plus lourde à mettre en œuvre et plus susceptible de modifier l'intention de conception.
+
+%% --- Section 7 : Limites et perspectives ---
+\subsection{Limites et perspectives}
+
+\paragraph{Limites identifiées.}
+Malgré son efficacité, la technique Try-to-Join présente plusieurs limites inhérentes au fonctionnement du noyau CGM et à l'environnement CATIA. Le \autoref{tab:limites-auto-intersection} en dresse la synthèse.
 
 \begin{table}[H]
     \centering
@@ -369,25 +226,101 @@ Le \autoref{tab:limites-auto-intersection} résume les principales limites ident
         \textcolor{white}{\textbf{Limite}} & \centering\textcolor{white}{\textbf{Explication}} \tabularnewline
         \hline
         \rowcolor{rowlight}
-        Faux négatifs possibles & Si l'auto-intersection est inférieure à la tolérance interne CGM ($\approx 10^{-3}$~mm), le Join peut réussir sans la détecter. \\
+        Faux négatifs & Si l'auto-intersection est d'amplitude inférieure à la tolérance interne du noyau CGM ($\approx 10^{-3}$~mm), le Join peut réussir sans détecter le défaut. La surface est alors validée à tort. \\
         \hline
         \rowcolor{rowwhite}
-        Faux positifs possibles & Une surface avec des discontinuités de tangence marquées peut faire échouer le Join sans être réellement auto-intersectante. \\
+        Faux positifs & Une surface présentant des discontinuités de tangence marquées (raccords G0) peut faire échouer le Join sans être réellement auto-intersectante. Le défaut signalé est alors un problème de continuité, non d'auto-intersection. \\
         \hline
         \rowcolor{rowlight}
-        Performance & Pour les assemblages volumineux ($> 500$ surfaces), la création/suppression de Joins temporaires peut être lente. \\
+        Performance sur grands assemblages & Pour les assemblages volumineux comportant plus de 500 surfaces, la création et la suppression successives de Joins temporaires engendrent un temps de traitement significatif. \\
         \hline
         \rowcolor{rowwhite}
-        Type de document & Le macro ne traite pas les CATDrawing ni les CATAnalysis. \\
+        Périmètre documentaire & La macro ne traite que les \texttt{CATPart}. Les documents de type \texttt{CATDrawing} et \texttt{CATAnalysis} ne sont pas pris en charge. \\
+        \hline
+        \rowcolor{rowlight}
+        Absence de localisation précise & La technique indique \textit{qu'une} auto-intersection existe, mais ne fournit pas les coordonnées exactes de la zone de conflit. Le concepteur doit ensuite localiser visuellement le défaut. \\
         \hline
     \end{tabularx}
 \end{table}
 
-Parmi les améliorations envisageables :
+\paragraph{Perspectives d'amélioration.}
+Plusieurs axes d'évolution sont envisageables pour renforcer l'outil de détection :
 
 \begin{itemize}
-    \item[•] \textbf{Coloration visuelle :} Colorier en rouge les surfaces défaillantes via \texttt{VisProperties.SetRealColor}.
-    \item[•] \textbf{Export CSV :} Écrire le rapport dans un fichier pour traçabilité et intégration dans les processus qualité.
-    \item[•] \textbf{Seuil de tolérance configurable :} Permettre à l'utilisateur de définir la tolérance angulaire et positionnelle.
-    \item[•] \textbf{Chaîne de contrôle complète :} Chaîner avec la vérification de vrillage, sliver faces et solidité.
+    \item[•] \textbf{Coloration visuelle des défauts :} colorier automatiquement en rouge les surfaces défaillantes via \texttt{VisProperties.SetRealColor}, permettant au concepteur d'identifier instantanément les zones à corriger dans l'arbre de spécifications.
+    \item[•] \textbf{Export du rapport en CSV :} générer un fichier de traçabilité contenant le nom de chaque surface, son statut (conforme / non conforme) et l'horodatage du contrôle, pour intégration dans le processus qualité du projet.
+    \item[•] \textbf{Seuil de tolérance configurable :} permettre à l'utilisateur de définir la tolérance angulaire et positionnelle utilisée par le test, afin d'adapter la sensibilité de la détection au contexte métier (aéronautique vs.\ automobile, par exemple).
+    \item[•] \textbf{Chaîne de contrôle intégrée :} chaîner la vérification d'auto-intersection avec les autres contrôles surfaciques (vrillage, \textit{sliver faces}, solidité) dans une macro unique, offrant un rapport qualité complet en une seule exécution.
+    \item[•] \textbf{Migration vers 3DEXPERIENCE :} dans le cadre d'une future migration vers la plateforme 3DEXPERIENCE, explorer les nouvelles API de vérification géométrique qui pourraient offrir un accès direct aux fonctions de détection d'auto-intersection.
 \end{itemize}
+
+%% ============================================================
+%%  VRILLAGE
+%% ============================================================
+\section{Vrillage (Auto-repliement)}
+
+\subsection{Définition et fondements mathématiques}
+
+Le vrillage (ou \textit{auto-repliement}) est une anomalie topologique majeure survenant lors de la génération de surfaces complexes via les fonctions de balayage (\textit{Sweep}) ou de surfaces multi-sections. Il se traduit par une inversion locale de la matière où la surface se croise elle-même.
+
+Pour qu'une surface $\mathbf{S}(u,v)$ soit valide, sa paramétrisation doit être régulière. Le déterminant du Jacobien ($J$) traduit cette régularité :
+\begin{equation*}
+    J(u,v) = \left\| \frac{\partial \mathbf{S}}{\partial u} \times \frac{\partial \mathbf{S}}{\partial v} \right\|
+\end{equation*}
+
+\begin{itemize}
+    \item[�] \textbf{Surface saine :} $J(u,v) > 0$ sur l'ensemble du domaine paramétrique.
+    \item[�] \textbf{Vrillage :} apparaît lorsque $J(u,v) \le 0$. La surface perd alors sa propriété de variété (\textit{manifold}) ; les vecteurs tangents deviennent colinéaires, provoquant un effondrement géométrique.
+\end{itemize}
+
+Trois causes racines génèrent ce défaut en CAO :
+\begin{itemize}
+    \item[�] \textbf{Défaut de couplage :} mauvaise correspondance des points de fermeture (\textit{Closing Points}) entre sections.
+    \item[�] \textbf{Conflit de tangence :} vecteurs de tangence opposés aux extrémités forçant une boucle.
+    \item[�] \textbf{Saturation de l'épine (\textit{Spine}) :} rayon de courbure de la courbe guide inférieur à la demi-largeur de la section balayée.
+\end{itemize}
+
+\subsection{Justification métier : pourquoi détecter ce défaut ?}
+
+Le vrillage constitue un critère d'exclusion lors du \textit{Q-Checking} :
+
+\begin{itemize}
+    \item[�] \textbf{Maillage (FEA) :} les solveurs ne peuvent pas traiter des faces auto-pénétrantes, entraînant un échec de simulation.
+    \item[�] \textbf{Usinage (FAO) :} les normales erronées provoquent des collisions d'outil ou des trajectoires impossibles.
+    \item[�] \textbf{Qualité perçue (Class A) :} rupture brutale des lignes de reflet (zébras), inacceptable en carrosserie.
+\end{itemize}
+
+La macro de détection permet d'identifier ces zones critiques avant toute transmission aux métiers aval.
+
+\subsection{Pseudocode de l'algorithme}
+
+% TODO : Insérer ici la capture d'écran du pseudocode / code VBA
+\begin{center}
+    \textit{[Image du pseudocode de la macro vrillage à insérer]}
+    % \includegraphics[width=\textwidth]{Figures/pseudocode-vrillage.png}
+\end{center}
+
+\subsection{Étapes de la macro}
+
+\begin{itemize}
+    \item[�] \textbf{Discrétisation :} balayage de la surface sur une grille de points $P_{i,j}$.
+    \item[�] \textbf{Calcul des normales :} extraction du vecteur unitaire $\mathbf{n}_{i,j}$ en chaque point.
+    \item[�] \textbf{Test d'inversion :} si $\mathbf{n}_{i,j} \cdot \mathbf{n}_{i+1,j} < 0$, une inversion de normale est détectée.
+    \item[�] \textbf{Verdict :} la zone est identifiée comme \textit{Twisted Surface} et la validation du modèle est bloquée.
+\end{itemize}
+
+% TODO : Insérer ici l'illustration visuelle des étapes de la macro
+\begin{center}
+    \textit{[Illustration visuelle des étapes à insérer]}
+    % \includegraphics[width=\textwidth]{Figures/etapes-macro-vrillage.png}
+\end{center}
+
+\subsection{Organigramme de la macro}
+
+% TODO : Insérer ici le flowchart de la macro vrillage
+\begin{center}
+    \textit{[Organigramme (flowchart) de la macro à insérer]}
+    % \includegraphics[width=0.8\textwidth]{Figures/flowchart-vrillage.png}
+\end{center}
+
+
