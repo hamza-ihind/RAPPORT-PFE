@@ -10,39 +10,260 @@ Cette partie présente les critères de qualité identifiés, leurs fondements m
 
 \section{Convention de nommage}
 
-Une convention de nommage est un ensemble de règles permettant d'attribuer des identifiants uniques et cohérents aux entités d'un système. Dans un environnement CAO tel que CATIA, l'absence d'une nomenclature rigoureuse entraîne des difficultés de recherche dans les gestionnaires de données (ENOVIA, Windchill), des erreurs d'assemblage, des complications lors de l'exécution de macros automatisées, ainsi qu'une perte de temps lors des revues de conception.
+\subsection{Contexte et enjeu}
 
-La convention retenue pour ce projet suit le format \texttt{XXX-0000}, où \texttt{XXX} représente exactement trois lettres majuscules (code famille ou département), suivi d'un tiret séparateur, puis de trois ou quatre chiffres de séquencement. Par exemple, \texttt{MEC-001} et \texttt{ASS-1234} sont des noms conformes, tandis que \texttt{mec-001} (minuscules), \texttt{MEC001} (absence de tiret) ou \texttt{MEC-001A} (caractère supplémentaire) sont rejetés.
+Dans un environnement de conception collaboratif tel que CATIA~V5, chaque entité --- pièce (\textit{Part}), assemblage (\textit{Product}), surface ou feature --- est identifiée avant tout par son \textbf{nom} dans l'arbre de spécifications. Ce nom constitue la clé d'accès à l'objet pour les outils PDM/PLM (ENOVIA, Windchill), pour les scripts d'automatisation et pour l'ensemble des métiers aval (FAO, FEA, approvisionnement). Une convention de nommage est donc bien plus qu'une question d'esthétique : c'est un \textbf{contrat de lisibilité} entre tous les acteurs de la chaîne numérique.
 
-\subsection{Algorithme de vérification}
+Chez Segula Technologies, les projets automotive impliquent plusieurs centaines de pièces, développées en parallèle par des équipes réparties. En l'absence d'une règle de nommage imposée et vérifiée automatiquement, des dérives apparaissent inévitablement : noms génériques (\texttt{Part1}, \texttt{Body2}), noms en minuscules, ou noms sans code département. Ces incohérences se répercutent directement sur la chaîne de valeur.
 
-L'algorithme implémenté dans la macro VBA contrôle automatiquement la conformité des noms de pièces et d'assemblages CATIA. Il repose sur la détection du type de document actif, l'utilisation d'une expression régulière pour valider le format, un parcours récursif pour inspecter tous les niveaux d'un assemblage, et la génération d'un rapport de non-conformités.
+\subsection{Justification métier}
 
-\subsubsection{Pseudocode de l'algorithme}
+L'absence ou le non-respect d'une convention de nommage génère des dysfonctionnements concrets à plusieurs niveaux de la chaîne de développement produit. Le \autoref{tab:impacts-nommage} synthétise les principaux impacts identifiés au cours de la phase Mesurer.
 
-% TODO : Insérer ici la capture d'écran du pseudocode / code VBA
-\begin{center}
-    \textit{[Image du pseudocode à insérer]}
-    % \includegraphics[width=\textwidth]{Figures/pseudocode-nommage.png}
-\end{center}
+\begin{table}[H]
+    \centering
+    \caption{Impacts métier d'une convention de nommage non respectée}
+    \label{tab:impacts-nommage}
+    \begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{3.8cm}|X|}
+        \hline
+        \rowcolor{headerblue}
+        \textcolor{white}{\textbf{Domaine impacté}} & \centering\textcolor{white}{\textbf{Conséquence opérationnelle}} \tabularnewline
+        \hline
+        \rowcolor{rowlight}
+        Gestion de données produit (PDM/PLM) & Un nom non conforme ne remonte pas correctement dans les requêtes ENOVIA/Wind\-chill. La pièce devient introuvable dans les référentiels, générant des doublons et des risques de livraison d'une version obsolète. \\
+        \hline
+        \rowcolor{rowwhite}
+        Assemblage & Un nom générique (\texttt{Part1}, \texttt{Body2}) rend impossible l'identification rapide d'une pièce dans un assemblage de plusieurs centaines de composants, multipliant les erreurs de substitution lors des échanges inter-équipes. \\
+        \hline
+        \rowcolor{rowlight}
+        Automatisation Q-Checker & Les scripts de contrôle qui filtrent les pièces par code famille (ex.\ \texttt{MEC-*}, \texttt{STR-*}) échouent silencieusement si les noms ne respectent pas le format attendu. Le contrôle qualité automatisé devient inopérant sur ces pièces. \\
+        \hline
+        \rowcolor{rowwhite}
+        Revues de conception & Un arbre de spécifications incohérent ralentit l'identification des responsabilités et des jalons de validation. Le temps perdu à identifier les pièces se répercute directement sur le planning projet. \\
+        \hline
+        \rowcolor{rowlight}
+        Approvisionnement & Une référence non conforme rompt la traçabilité vers la nomenclature de fabrication (BOM). L'ERP ne reconnaît pas la référence, bloquant les commandes fournisseurs. \\
+        \hline
+    \end{tabularx}
+\end{table}
 
-\subsection{Étapes de la macro}
+\subsection{Règle de nommage retenue}
 
-Les principales étapes de fonctionnement de la macro sont les suivantes :
+La convention adoptée pour ce projet suit le format \texttt{XXX-NNNN}, défini comme suit :
 
 \begin{itemize}
+    \item[•] \textbf{\texttt{XXX}} : exactement trois lettres majuscules, représentant le code famille ou département (\texttt{MEC} pour mécanique, \texttt{STR} pour structure, \texttt{ASS} pour assemblage, etc.).
+    \item[•] \textbf{\texttt{-}} : un tiret séparateur obligatoire.
+    \item[•] \textbf{\texttt{NNNN}} : trois ou quatre chiffres de séquencement, commençant à \texttt{001}.
+\end{itemize}
+
+\noindent\textbf{Exemples conformes :} \texttt{MEC-001}, \texttt{STR-0042}, \texttt{ASS-1234}.
+
+\noindent\textbf{Exemples non conformes :} \texttt{mec-001} (minuscules), \texttt{MEC001} (tiret absent), \texttt{MEC-001A} (caractère supplémentaire non autorisé), \texttt{Part1} (nom générique CATIA par défaut).
+
+\subsection{Typologies de non-conformités observées}
+
+L'analyse des fichiers CAO reçus et des projets en cours a permis d'identifier quatre typologies récurrentes de non-conformité, synthétisées dans le \autoref{tab:typologies-nommage}.
+
+\begin{table}[H]
+    \centering
+    \caption{Typologies de non-conformités de nommage observées}
+    \label{tab:typologies-nommage}
+    \begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{3.5cm}|p{3.5cm}|X|}
+        \hline
+        \rowcolor{headerblue}
+        \textcolor{white}{\textbf{Type}} & \textcolor{white}{\textbf{Exemple}} & \centering\textcolor{white}{\textbf{Cause racine}} \tabularnewline
+        \hline
+        \rowcolor{rowlight}
+        Nom CATIA par défaut & \texttt{Part1}, \texttt{Product2} & Pièce créée mais jamais renommée. Résultat habituel d'un travail intermédiaire non finalisé avant livraison. \\
+        \hline
+        \rowcolor{rowwhite}
+        Casse incorrecte & \texttt{mec-001}, \texttt{Mec-001} & Absence de règle imposée dans les gabarits projet ou saisie manuelle non contrôlée. \\
+        \hline
+        \rowcolor{rowlight}
+        Format non conforme & \texttt{MEC001}, \texttt{ME-01} & Raccourci informel pris par le concepteur (deux lettres au lieu de trois, tiret oublié). \\
+        \hline
+        \rowcolor{rowwhite}
+        Caractères non autorisés & \texttt{MEC-001\_REV2}, \texttt{MEC-001A} & Ajout d'un indice de révision dans le nom --- pratique héritée de flux non-PLM qui contamine l'identifiant officiel. \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\subsection{Stratégies de correction}
+
+La correction des non-conformités de nommage obéit à une logique de priorité selon leur impact PDM. Le \autoref{tab:correction-nommage} présente les actions correctives recommandées.
+
+\begin{table}[H]
+    \centering
+    \caption{Stratégies de correction des non-conformités de nommage}
+    \label{tab:correction-nommage}
+    \begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{3.5cm}|X|>{\centering\arraybackslash}p{2.2cm}|}
+        \hline
+        \rowcolor{headerblue}
+        \textcolor{white}{\textbf{Action corrective}} & \centering\textcolor{white}{\textbf{Description}} & \textcolor{white}{\textbf{Priorité}} \tabularnewline
+        \hline
+        \rowcolor{rowlight}
+        Renommage manuel immédiat & Pour un faible nombre de pièces non conformes, le concepteur renomme directement dans l'arbre CATIA ou dans l'interface PDM en suivant le format \texttt{XXX-NNNN}. & Haute \\
+        \hline
+        \rowcolor{rowwhite}
+        Mise à jour des gabarits & Intégrer la convention dans les \textit{templates} CATIA (\texttt{.CATPart}, \texttt{.CATProduct}) utilisés à la création de fichiers, afin que chaque nouveau fichier respecte d'emblée le format. & Haute \\
+        \hline
+        \rowcolor{rowlight}
+        Règle de contrôle PDM & Configurer une règle de validation dans ENOVIA/Windchill qui bloque le \textit{check-in} d'un fichier au nom non conforme, faisant du PDM le dernier rempart contre les incohérences. & Moyenne \\
+        \hline
+        \rowcolor{rowwhite}
+        Sensibilisation des équipes & Organiser une session de formation courte pour rappeler la règle de nommage, illustrée par des exemples d'impacts réels, afin de réduire les dérives à la source. & Basse \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\begin{block}[note]
+L'automatisation de la vérification de ces règles --- via une macro Q-Checker dédiée --- sera présentée dans la phase \textit{Innover}. La phase \textit{Mesurer} se concentre ici sur la compréhension du problème et la qualification de son impact métier.
+\end{block}
+
+\iffalse
     \item[�] \textbf{Récupération du document actif :} la macro accède au document ouvert dans CATIA via \texttt{CATIA.ActiveDocument}.
     \item[�] \textbf{Identification du type de document :} distinction entre \texttt{PartDocument} (pièce) et \texttt{ProductDocument} (assemblage) à l'aide de \texttt{TypeName()}.
     \item[�] \textbf{Validation du nom (pièce) :} le nom de la pièce est extrait et comparé au pattern \texttt{\textasciicircum[A-Z]\{3\}-\textbackslash d\{3,4\}\$} via une expression régulière.
     \item[�] \textbf{Parcours récursif (assemblage) :} pour un assemblage, la macro inspecte récursivement chaque sous-produit et valide son \texttt{PartNumber}.
     \item[�] \textbf{Génération du rapport :} les noms non conformes sont collectés et affichés dans un message récapitulatif à l'utilisateur.
+\fi
+
+%% ============================================================
+%%  VÉRIFICATION SOLIDE ET PLEIN
+%% ============================================================
+\section{Vérification qu'un Part est solide et plein}
+
+\subsection{Définition et contexte}
+
+Dans l'environnement CATIA~V5, un \textit{Part} est un fichier de conception (\texttt{.CATPart}) qui peut contenir deux types de géométrie :
+
+\begin{itemize}
+    \item[•] \textbf{La géométrie solide} --- créée dans le workbench \textit{Part Design}, stockée dans le \texttt{PartBody}. Elle représente un volume fermé, avec une masse et des propriétés mécaniques calculables.
+    \item[•] \textbf{La géométrie surfacique} --- créée dans le workbench \textit{Generative Shape Design} (GSD), stockée dans des \texttt{HybridBody}. Elle ne définit pas de volume à elle seule.
 \end{itemize}
 
-% TODO : Insérer ici le schéma visuel illustrant le flux de la macro
-\begin{center}
-    \textit{[Schéma visuel du flux de la macro à insérer]}
-    % \includegraphics[width=\textwidth]{Figures/schema-macro-nommage.png}
-\end{center}
+Un Part est dit \textbf{solide et plein} lorsque son corps principal (\texttt{MainBody}) contient des features opérationnelles dont le résultat cumulé produit un \textbf{volume strictement positif}. Un volume nul signifie que les opérations booléennes (ajouts, soustractions) se sont intégralement annulées, ou qu'aucune feature solide n'a été créée.
+
+\subsection{Justification métier}
+
+La vérification du volume n'est pas une simple formalité géométrique. Elle répond à des exigences concrètes dans un contexte industriel, synthétisées dans le \autoref{tab:justif-volume}.
+
+\begin{table}[H]
+    \centering
+    \caption{Justification métier de la vérification volumique}
+    \label{tab:justif-volume}
+    \begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{3.8cm}|X|}
+        \hline
+        \rowcolor{headerblue}
+        \textcolor{white}{\textbf{Exigence}} & \centering\textcolor{white}{\textbf{Conséquence d'un volume nul ou invalide}} \tabularnewline
+        \hline
+        \rowcolor{rowlight}
+        Fiabilité des analyses aval (CAE) & Toute simulation numérique (éléments finis, calcul thermique, mise en forme) requiert un solide fermé avec un volume défini. Un Part au volume nul génère des erreurs dans les solveurs, compromettant l'intégrité des résultats. \\
+        \hline
+        \rowcolor{rowwhite}
+        Cohérence de la nomenclature et des calculs de masse & Dans un assemblage CATIA (\texttt{CATProduct}), la masse de chaque composant est calculée à partir de son volume et de la densité du matériau. Un Part sans volume valide fausse les calculs de masse totale, impactant les études d'équilibre, de centrage et de résistance structurelle. \\
+        \hline
+        \rowcolor{rowlight}
+        Faisabilité fabrication & Un modèle destiné à la fabrication (usinage, fonderie, impression~3D) doit représenter un volume solide continu. Un volume nul empêche la génération correcte des trajectoires d'outil (FAO) et rend la pièce non-usinable numériquement. \\
+        \hline
+        \rowcolor{rowwhite}
+        Automatisation et contrôle qualité & La vérification systématique du volume par macro permet de filtrer les modèles invalides \textbf{avant} leur intégration dans un assemblage ou leur transmission à un bureau de fabrication, évitant des erreurs coûteuses en phase tardive du projet. \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\subsection{Mécanisme de mesure dans CATIA}
+
+\subsubsection{Le workbench SPAWorkbench (Space Analysis)}
+
+CATIA~V5 expose un workbench dédié aux mesures géométriques avancées : le \textbf{Space Analysis Workbench} (\texttt{SPAWorkbench}), accessible par macro via la méthode \texttt{GetWorkbench("SPAWorkbench")} appliquée au document actif. Ce workbench met à disposition la méthode \texttt{GetMeasurable()}, qui accepte un objet géométrique (Body, Face, Surface) et retourne un objet \texttt{Measurable} exposant les propriétés physiques calculées. Le \autoref{tab:spa-props} résume les principales propriétés disponibles.
+
+\begin{table}[H]
+    \centering
+    \caption{Propriétés de mesure exposées par le SPAWorkbench}
+    \label{tab:spa-props}
+    \begin{tabularx}{\textwidth}{|>{\ttfamily\raggedright\arraybackslash}p{3.5cm}|X|>{\centering\arraybackslash}p{2.5cm}|}
+        \hline
+        \rowcolor{headerblue}
+        \normalfont\textcolor{white}{\textbf{Propriété}} & \centering\textcolor{white}{\textbf{Signification}} & \textcolor{white}{\textbf{Unité SI}} \tabularnewline
+        \hline
+        \rowcolor{rowlight}
+        .Volume & Volume total du solide & m$^{3}$ \\
+        \hline
+        \rowcolor{rowwhite}
+        .Area & Aire totale de la surface extérieure & m$^{2}$ \\
+        \hline
+        \rowcolor{rowlight}
+        GetCOG() & Coordonnées du centre de gravité & m \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\begin{block}[note]
+CATIA travaille en système SI interne (mètres). Les valeurs retournées par \texttt{SPAWorkbench} doivent être converties : volume $\times 10^{9}$ pour obtenir des mm$^{3}$, aire $\times 10^{6}$ pour obtenir des mm$^{2}$.
+\end{block}
+
+\subsubsection{Mécanisme de calcul interne}
+
+Le moteur géométrique de CATIA, basé sur le noyau \textbf{CGM} (\textit{Convergent Geometry Modeler}), calcule le volume par intégration numérique sur la représentation B-Rep (\textit{Boundary Representation}) du solide. La représentation B-Rep décrit un solide par l'ensemble de ses faces, arêtes et sommets. Pour qu'un volume soit calculable, trois conditions doivent être satisfaites :
+
+\begin{itemize}
+    \item[•] La géométrie doit être \textbf{fermée} (pas de face manquante).
+    \item[•] Les normales de toutes les faces doivent pointer vers l'\textbf{extérieur} du solide.
+    \item[•] Aucune \textbf{auto-intersection} ne doit exister sur les faces ou les arêtes.
+\end{itemize}
+
+Si l'une de ces conditions est violée, CATIA retourne un volume nul ou lève une erreur.
+
+\subsection{Stratégies de correction}
+
+Lorsque la macro détecte un volume nul ou une anomalie, plusieurs causes sont possibles. Le \autoref{tab:correction-volume} présente les cas fréquents et les actions correctives recommandées.
+
+\begin{table}[H]
+    \centering
+    \caption{Stratégies de correction en cas de volume nul ou invalide}
+    \label{tab:correction-volume}
+    \begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{3.2cm}|p{3.8cm}|X|}
+        \hline
+        \rowcolor{headerblue}
+        \textcolor{white}{\textbf{Cas détecté}} & \textcolor{white}{\textbf{Cause probable}} & \centering\textcolor{white}{\textbf{Action corrective}} \tabularnewline
+        \hline
+        \rowcolor{rowlight}
+        PartBody vide & Aucune feature solide créée & Créer un Pad, Shaft ou autre feature de base dans Part Design. \\
+        \hline
+        \rowcolor{rowwhite}
+        Volume = 0 avec features & Pocket de même dimension qu'un Pad (annulation totale) & Vérifier l'arbre de construction --- réduire la profondeur du Pocket. \\
+        \hline
+        \rowcolor{rowlight}
+        Erreur de mesure & Géométrie invalide (auto-intersection, face ouverte) & Utiliser \textit{Analyze~$\rightarrow$ Check Geometry} pour localiser les défauts. \\
+        \hline
+        \rowcolor{rowwhite}
+        Mauvais type de document & Fichier Product ou Drawing ouvert au lieu d'un Part & Ouvrir le fichier \texttt{.CATPart} correspondant. \\
+        \hline
+        \rowcolor{rowlight}
+        Volume anormalement faible & Feature mal dimensionnée ou unités incorrectes & Vérifier les unités du document (\textit{Tools~$\rightarrow$ Options~$\rightarrow$ Parameters \& Measure}). \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\paragraph{Utiliser Check Geometry.}
+L'outil \textbf{Analyze~$\rightarrow$ Check Geometry} (disponible dans Part Design et GSD) permet d'inspecter automatiquement un solide et d'identifier les faces en auto-intersection, les arêtes non-manifold (partagées par plus de deux faces) et les faces de surface nulle. Il est recommandé d'exécuter cet outil systématiquement avant toute analyse volumique par macro, afin de garantir la validité topologique du modèle.
+
+\paragraph{Reconstruire l'arbre de features.}
+Lorsqu'une annulation de volume est constatée, il est utile de \textbf{désactiver les features} une par une (clic droit $\rightarrow$ \textit{Deactivate}) pour identifier celle qui neutralise le volume. Cette approche par isolation permet un diagnostic rapide sans modifier définitivement la géométrie.
+
+\subsection{Limites de la méthode}
+
+\begin{itemize}
+    \item[•] La macro analyse uniquement le \textbf{MainBody} (PartBody principal). Les corps secondaires (\textit{Bodies}) et les géométries surfaciques (\textit{HybridBodies}) ne sont pas pris en compte.
+    \item[•] Le \texttt{SPAWorkbench} doit être disponible dans la licence CATIA active. En l'absence de ce module, la macro lèvera une erreur à l'appel de \texttt{GetWorkbench()}.
+    \item[•] La précision du calcul volumique dépend de la tolérance de modélisation définie dans les options CATIA (\textit{Tools~$\rightarrow$ Options~$\rightarrow$ Shape~$\rightarrow$ General}).
+\end{itemize}
+
+\begin{block}[note]
+L'implémentation de la macro de vérification volumique --- incluant le code VBA complet --- sera détaillée dans la phase \textit{Innover}. La présente section se limite à la compréhension du problème, à sa justification métier et aux stratégies de correction.
+\end{block}
 
 %% ============================================================
 %%  AUTO-INTERSECTION
