@@ -1,14 +1,13 @@
-%%% Fonts %%%
-\usepackage[T1]{fontenc} % Font encoding for extended character sets.
-\usepackage{newpxmath} % Use PX fonts for math (alternative to standard fonts).
-\usepackage{fvextra} % Enhanced customisation of verbatim environments.
-\usepackage{csquotes} % Context-sensitive quotation marks.
-\usepackage{tgpagella}
-\usepackage{tgheros}
-\usepackage{tgtermes}
-\usepackage{ebgaramond}
+%%% Fonts (XeLaTeX / fontspec) %%%
+\usepackage{fontspec}
+\defaultfontfeatures{Ligatures=TeX}
+\setmainfont{TeX Gyre Pagella}   % TeX Gyre Pagella (qpl) — OpenType
+\setsansfont{TeX Gyre Heros}     % Helvetica-equivalent sans-serif
+\usepackage{newpxmath}           % Palatino-compatible math symbols.
+\usepackage{fvextra}             % Enhanced customisation of verbatim environments.
+\usepackage{csquotes}            % Context-sensitive quotation marks.
 
 \linespread{1.15} % Slightly increase line spacing.
-\newcommand{\garamondfont}{\ebgaramond}
+\newcommand{\garamondfont}{\rmfamily}
 \newcommand{\latofont}{\sffamily}
 \newcommand{\crimsonfont}{\rmfamily}

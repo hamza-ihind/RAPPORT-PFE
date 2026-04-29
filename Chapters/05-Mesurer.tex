@@ -2,17 +2,15 @@
 \chapter{Mesurer}
 \label{cp:mesurer}
 
-Après avoir défini les objectifs et le périmètre du projet dans la phase \textit{Définir}, nous entamons désormais la phase \textit{Mesurer} de la démarche DMAIC. Cette étape consiste à quantifier l'état actuel du processus de vérification qualité, à identifier les critères de conformité critiques et à établir des indicateurs de performance mesurables.
+Après avoir défini les objectifs et le périmètre du projet dans la phase \textit{Définir}, nous entamons désormais la phase \textit{Mesurer} de la démarche DMAIC. Cette phase vise à formaliser les règles métier qui serviront de référence pour automatiser les vérifications, en couvrant l'ensemble des catégories de non-conformités identifiées dans l'environnement CATIA~V5.
 
-L'objectif de cette phase est double : d'une part, collecter les données nécessaires pour évaluer l'ampleur du problème de contrôle qualité sur les surfaces CATIA, et d'autre part, formaliser les règles métier qui serviront de référence pour automatiser les vérifications. Nous nous concentrons en particulier sur les défauts surfaciques tels que les auto-intersections, qui constituent l'un des principaux obstacles à la fabricabilité des pièces conçues.
-
-Cette partie présente les critères de qualité identifiés, leurs fondements mathématiques, ainsi que les mécanismes de détection que les macros Q-Checker métier devront automatiser.
+Cette partie présente les critères de qualité retenus --- convention de nommage, solidité des modèles, auto-intersection et vrillage --- leurs fondements mathématiques, ainsi que les mécanismes de détection que les macros Q-Checker métier devront automatiser.
 
 \section{Convention de nommage}
 
 \subsection{Contexte et enjeu}
 
-Dans un environnement de conception collaboratif tel que CATIA~V5, chaque entité --- pièce (\textit{Part}), assemblage (\textit{Product}), surface ou feature --- est identifiée avant tout par son \textbf{nom} dans l'arbre de spécifications. Ce nom constitue la clé d'accès à l'objet pour les outils PDM/PLM (ENOVIA, Windchill), pour les scripts d'automatisation et pour l'ensemble des métiers aval (FAO, FEA, approvisionnement). Une convention de nommage est donc bien plus qu'une question d'esthétique : c'est un \textbf{contrat de lisibilité} entre tous les acteurs de la chaîne numérique.
+Dans un environnement de conception collaboratif tel que CATIA~V5, chaque pièce, assemblage, surface ou feature est identifiée avant tout par son \textbf{nom} dans l'arbre de spécifications. Ce nom constitue la clé d'accès à l'objet pour les outils PDM/PLM (ENOVIA, Windchill), pour les scripts d'automatisation et pour l'ensemble des métiers aval (FAO, FEA, approvisionnement). Une convention de nommage est donc bien plus qu'une question d'esthétique, c'est un \textbf{contrat de lisibilité} entre tous les acteurs de la chaîne numérique.
 
 Chez Segula Technologies, les projets automotive impliquent plusieurs centaines de pièces, développées en parallèle par des équipes réparties. En l'absence d'une règle de nommage imposée et vérifiée automatiquement, des dérives apparaissent inévitablement : noms génériques (\texttt{Part1}, \texttt{Body2}), noms en minuscules, ou noms sans code département. Ces incohérences se répercutent directement sur la chaîne de valeur.
 
@@ -33,7 +31,7 @@ L'absence ou le non-respect d'une convention de nommage génère des dysfonction
         Gestion de données produit (PDM/PLM) & Un nom non conforme ne remonte pas correctement dans les requêtes ENOVIA/Wind\-chill. La pièce devient introuvable dans les référentiels, générant des doublons et des risques de livraison d'une version obsolète. \\
         \hline
         \rowcolor{rowwhite}
-        Assemblage & Un nom générique (\texttt{Part1}, \texttt{Body2}) rend impossible l'identification rapide d'une pièce dans un assemblage de plusieurs centaines de composants, multipliant les erreurs de substitution lors des échanges inter-équipes. \\
+        Assemblage & Un nom générique rend impossible l'identification rapide d'une pièce dans un assemblage de plusieurs centaines de composants, multipliant les erreurs de substitution lors des échanges inter-équipes. \\
         \hline
         \rowcolor{rowlight}
         Automatisation Q-Checker & Les scripts de contrôle qui filtrent les pièces par code famille (ex.\ \texttt{MEC-*}, \texttt{STR-*}) échouent silencieusement si les noms ne respectent pas le format attendu. Le contrôle qualité automatisé devient inopérant sur ces pièces. \\
@@ -61,34 +59,6 @@ La convention adoptée pour ce projet suit le format \texttt{XXX-NNNN}, défini 
 
 \noindent\textbf{Exemples non conformes :} \texttt{mec-001} (minuscules), \texttt{MEC001} (tiret absent), \texttt{MEC-001A} (caractère supplémentaire non autorisé), \texttt{Part1} (nom générique CATIA par défaut).
 
-\subsection{Typologies de non-conformités observées}
-
-L'analyse des fichiers CAO reçus et des projets en cours a permis d'identifier quatre typologies récurrentes de non-conformité, synthétisées dans le \autoref{tab:typologies-nommage}.
-
-\begin{table}[H]
-    \centering
-    \caption{Typologies de non-conformités de nommage observées}
-    \label{tab:typologies-nommage}
-    \begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{3.5cm}|p{3.5cm}|X|}
-        \hline
-        \rowcolor{headerblue}
-        \textcolor{white}{\textbf{Type}} & \textcolor{white}{\textbf{Exemple}} & \centering\textcolor{white}{\textbf{Cause racine}} \tabularnewline
-        \hline
-        \rowcolor{rowlight}
-        Nom CATIA par défaut & \texttt{Part1}, \texttt{Product2} & Pièce créée mais jamais renommée. Résultat habituel d'un travail intermédiaire non finalisé avant livraison. \\
-        \hline
-        \rowcolor{rowwhite}
-        Casse incorrecte & \texttt{mec-001}, \texttt{Mec-001} & Absence de règle imposée dans les gabarits projet ou saisie manuelle non contrôlée. \\
-        \hline
-        \rowcolor{rowlight}
-        Format non conforme & \texttt{MEC001}, \texttt{ME-01} & Raccourci informel pris par le concepteur (deux lettres au lieu de trois, tiret oublié). \\
-        \hline
-        \rowcolor{rowwhite}
-        Caractères non autorisés & \texttt{MEC-001\_REV2}, \texttt{MEC-001A} & Ajout d'un indice de révision dans le nom --- pratique héritée de flux non-PLM qui contamine l'identifiant officiel. \\
-        \hline
-    \end{tabularx}
-\end{table}
-
 \subsection{Stratégies de correction}
 
 La correction des non-conformités de nommage obéit à une logique de priorité selon leur impact PDM. Le \autoref{tab:correction-nommage} présente les actions correctives recommandées.
@@ -104,9 +74,6 @@ La correction des non-conformités de nommage obéit à une logique de priorité
         \hline
         \rowcolor{rowlight}
         Renommage manuel immédiat & Pour un faible nombre de pièces non conformes, le concepteur renomme directement dans l'arbre CATIA ou dans l'interface PDM en suivant le format \texttt{XXX-NNNN}. & Haute \\
-        \hline
-        \rowcolor{rowwhite}
-        Mise à jour des gabarits & Intégrer la convention dans les \textit{templates} CATIA (\texttt{.CATPart}, \texttt{.CATProduct}) utilisés à la création de fichiers, afin que chaque nouveau fichier respecte d'emblée le format. & Haute \\
         \hline
         \rowcolor{rowlight}
         Règle de contrôle PDM & Configurer une règle de validation dans ENOVIA/Windchill qui bloque le \textit{check-in} d'un fichier au nom non conforme, faisant du PDM le dernier rempart contre les incohérences. & Moyenne \\
@@ -206,7 +173,7 @@ CATIA travaille en système SI interne (mètres). Les valeurs retournées par \t
 
 \subsubsection{Mécanisme de calcul interne}
 
-Le moteur géométrique de CATIA, basé sur le noyau \textbf{CGM} (\textit{Convergent Geometry Modeler}), calcule le volume par intégration numérique sur la représentation B-Rep (\textit{Boundary Representation}) du solide. La représentation B-Rep décrit un solide par l'ensemble de ses faces, arêtes et sommets. Pour qu'un volume soit calculable, trois conditions doivent être satisfaites :
+Le moteur géométrique de CATIA calcule le volume d'un solide par intégration numérique sur sa géométrie 3D. Pour qu'un volume soit calculable, trois conditions doivent être satisfaites :
 
 \begin{itemize}
     \item[•] La géométrie doit être \textbf{fermée} (pas de face manquante).
@@ -247,12 +214,6 @@ Lorsque la macro détecte un volume nul ou une anomalie, plusieurs causes sont p
     \end{tabularx}
 \end{table}
 
-\paragraph{Utiliser Check Geometry.}
-L'outil \textbf{Analyze~$\rightarrow$ Check Geometry} (disponible dans Part Design et GSD) permet d'inspecter automatiquement un solide et d'identifier les faces en auto-intersection, les arêtes non-manifold (partagées par plus de deux faces) et les faces de surface nulle. Il est recommandé d'exécuter cet outil systématiquement avant toute analyse volumique par macro, afin de garantir la validité topologique du modèle.
-
-\paragraph{Reconstruire l'arbre de features.}
-Lorsqu'une annulation de volume est constatée, il est utile de \textbf{désactiver les features} une par une (clic droit $\rightarrow$ \textit{Deactivate}) pour identifier celle qui neutralise le volume. Cette approche par isolation permet un diagnostic rapide sans modifier définitivement la géométrie.
-
 \subsection{Limites de la méthode}
 
 \begin{itemize}
@@ -260,10 +221,6 @@ Lorsqu'une annulation de volume est constatée, il est utile de \textbf{désacti
     \item[•] Le \texttt{SPAWorkbench} doit être disponible dans la licence CATIA active. En l'absence de ce module, la macro lèvera une erreur à l'appel de \texttt{GetWorkbench()}.
     \item[•] La précision du calcul volumique dépend de la tolérance de modélisation définie dans les options CATIA (\textit{Tools~$\rightarrow$ Options~$\rightarrow$ Shape~$\rightarrow$ General}).
 \end{itemize}
-
-\begin{block}[note]
-L'implémentation de la macro de vérification volumique --- incluant le code VBA complet --- sera détaillée dans la phase \textit{Innover}. La présente section se limite à la compréhension du problème, à sa justification métier et aux stratégies de correction.
-\end{block}
 
 %% ============================================================
 %%  AUTO-INTERSECTION
