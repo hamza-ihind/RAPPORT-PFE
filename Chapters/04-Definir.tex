@@ -1,4 +1,421 @@
 \chapter{Définir}
 \label{cp:definir}
 
-\textit{À compléter.}
+\textit{La phase \textbf{Définir} constitue le point de départ de la démarche DMAIC. Elle vise à cadrer rigoureusement le projet en identifiant le problème, en formalisant les besoins des parties prenantes, en délimitant le périmètre d'intervention et en fixant les objectifs mesurables à atteindre. Les livrables produits dans cette phase — charte de projet, SIPOC, VOC/CTQ, cahier des charges — servent de référence tout au long du cycle DMAIC.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  SECTION I — DESCRIPTION DU PROCESSUS ACTUEL
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Description du processus actuel}
+
+\subsection{État des lieux : le contrôle qualité CATIA actuel}
+
+Dans l'environnement de conception actuel de Segula Technologies Maroc, le processus de contrôle qualité des modèles CATIA~V5 repose intégralement sur des vérifications manuelles. À chaque jalon de projet, un ingénieur concepteur inspecte visuellement chaque fichier \texttt{.CATPart} ou \texttt{.CATProduct}, en parcourant l'arbre de spécifications et en consultant les propriétés de la pièce pour détecter d'éventuelles non-conformités.
+
+Ce processus manuel présente plusieurs limites majeures :
+
+\begin{itemize}
+    \item[•] \textbf{Temps de vérification considérable :} le contrôle d'un assemblage complexe peut prendre plusieurs heures, voire des jours, mobilisant des ressources humaines précieuses.
+    \item[•] \textbf{Risque d'erreur humaine :} certaines non-conformités subtiles (auto-intersection, vrillage, nomenclature incorrecte) peuvent passer inaperçues lors d'une inspection visuelle.
+    \item[•] \textbf{Manque de traçabilité :} en l'absence de rapports automatisés, il est difficile de suivre l'historique des contrôles et de garantir la reproductibilité des vérifications.
+    \item[•] \textbf{Absence de standardisation :} chaque ingénieur applique ses propres critères de contrôle, en l'absence d'une procédure unifiée et vérifiable.
+\end{itemize}
+
+\subsection{Logigramme du processus de vérification actuel}
+
+Le \autoref{fig:logigramme-actuel} illustre les étapes séquentielles du processus de vérification manuelle tel qu'il est pratiqué aujourd'hui.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        node distance=1.2cm and 0.5cm,
+        startstop/.style={rectangle, rounded corners, minimum width=3.5cm, minimum height=0.8cm,
+            text centered, draw=ensablue, fill=ensablue!15, font=\small\bfseries},
+        process/.style={rectangle, minimum width=4.5cm, minimum height=0.8cm,
+            text centered, draw=ensablue!70, fill=ensablue!8, font=\small},
+        decision/.style={diamond, aspect=2.5, minimum width=4cm, minimum height=0.8cm,
+            text centered, draw=orange!80!black, fill=orange!12, font=\small},
+        arrow/.style={thick, ->, >=stealth}
+    ]
+        \node (start)   [startstop]                         {Réception du modèle CATIA};
+        \node (open)    [process, below=of start]           {Ouverture du fichier \texttt{.CATPart} / \texttt{.CATProduct}};
+        \node (naming)  [decision, below=of open]           {Nommage conforme ?};
+        \node (solid)   [decision, below=of naming]         {Part solide et plein ?};
+        \node (topo)    [decision, below=of solid]          {Défauts topologiques ?};
+        \node (report)  [process, below=of topo]            {Rédaction manuelle du rapport};
+        \node (deliver) [startstop, below=of report]        {Livraison ou retour en correction};
+
+        \draw [arrow] (start)   -- (open);
+        \draw [arrow] (open)    -- (naming);
+        \draw [arrow] (naming)  -- node[right,font=\scriptsize]{Oui} (solid);
+        \draw [arrow] (naming.east) -- ++(2,0) node[right,font=\scriptsize]{Non → correction} |- (open.east);
+        \draw [arrow] (solid)   -- node[right,font=\scriptsize]{Oui} (topo);
+        \draw [arrow] (solid.east) -- ++(2,0) node[right,font=\scriptsize]{Non → correction} |- (open.east);
+        \draw [arrow] (topo)    -- node[right,font=\scriptsize]{Non} (report);
+        \draw [arrow] (topo.east) -- ++(2,0) node[right,font=\scriptsize]{Oui → correction} |- (open.east);
+        \draw [arrow] (report)  -- (deliver);
+    \end{tikzpicture}
+    \caption{Logigramme du processus de vérification qualité CATIA actuel (manuel)}
+    \label{fig:logigramme-actuel}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  SECTION II — VOIX DU CLIENT (VOC) ET CTQ
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Voix du Client (VOC) et exigences métier}
+
+\subsection{Identification des parties prenantes}
+
+Le \autoref{tab:parties-prenantes} recense les principales parties prenantes du projet et leur niveau d'implication.
+
+\begin{table}[H]
+    \centering
+    \caption{Parties prenantes du projet}
+    \label{tab:parties-prenantes}
+    \begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{4cm}|X|>{\centering\arraybackslash}p{2.5cm}|}
+        \hline
+        \rowcolor{headerblue}
+        \textcolor{white}{\textbf{Partie prenante}} & \centering\textcolor{white}{\textbf{Rôle / Intérêt}} & \textcolor{white}{\textbf{Niveau}} \tabularnewline
+        \hline
+        \rowcolor{rowlight}
+        Ingénieurs concepteurs & Utilisateurs directs des macros ; ont besoin de retours rapides sur la conformité de leurs modèles. & Élevé \\
+        \hline
+        \rowcolor{rowwhite}
+        Responsable qualité & Garant du respect des règles métier ; valide les critères de conformité retenus. & Élevé \\
+        \hline
+        \rowcolor{rowlight}
+        Métiers aval (FAO, FEA) & Reçoivent les modèles pour simulation ou fabrication ; exigent des fichiers sans défaut topologique. & Élevé \\
+        \hline
+        \rowcolor{rowwhite}
+        Encadrant / Management & Suit l'avancement du projet et valide les livrables aux jalons DMAIC. & Moyen \\
+        \hline
+        \rowcolor{rowlight}
+        Système PDM / PLM & Environnement dans lequel circulent les fichiers ; les règles de nommage doivent être compatibles avec ENOVIA/Windchill. & Moyen \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\subsection{Recueil des besoins (VOC)}
+
+La collecte de la Voix du Client a été réalisée par entretiens avec les ingénieurs concepteurs et le responsable qualité de Segula Technologies Maroc. Les besoins exprimés se regroupent en quatre familles :
+
+\begin{enumerate}
+    \item \textbf{Rapidité :} les contrôles doivent s'exécuter en quelques secondes, même sur des assemblages industriels complexes.
+    \item \textbf{Exhaustivité :} chaque type de non-conformité pertinent (nommage, volume, topologie) doit être couvert par au moins une vérification automatisée.
+    \item \textbf{Traçabilité :} les résultats doivent être consignés dans un rapport clair, exportable, archivable.
+    \item \textbf{Accessibilité :} les macros doivent fonctionner dans CATIA~V5 standard, sans logiciel tiers ni licence supplémentaire.
+\end{enumerate}
+
+\subsection{Traduction en exigences CTQ (Critiques pour la Qualité)}
+
+La traduction VOC → CTQ permet de transformer les besoins qualitatifs en exigences mesurables. Le \autoref{tab:ctq} présente les critères CTQ retenus.
+
+\begin{table}[H]
+    \centering
+    \caption{Exigences CTQ issues de la Voix du Client}
+    \label{tab:ctq}
+    \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.2cm}|X|>{\raggedright\arraybackslash}p{3.5cm}|}
+        \hline
+        \rowcolor{headerblue}
+        \textcolor{white}{\textbf{Besoin VOC}} & \centering\textcolor{white}{\textbf{Exigence CTQ}} & \textcolor{white}{\textbf{Indicateur de mesure}} \tabularnewline
+        \hline
+        \rowcolor{rowlight}
+        Rapidité & Temps d'exécution d'une macro $\leq$ 30 secondes par fichier. & Chronomètre sur assemblage de 50 pièces. \\
+        \hline
+        \rowcolor{rowwhite}
+        Exhaustivité & Taux de détection des non-conformités connues $\geq$ 95\,\%. & Tests sur jeu de cas valides/invalides. \\
+        \hline
+        \rowcolor{rowlight}
+        Traçabilité & Génération d'un rapport structuré (boîte de dialogue ou fichier Excel) après chaque exécution. & Présence du rapport à chaque run. \\
+        \hline
+        \rowcolor{rowwhite}
+        Accessibilité & Zéro dépendance à un logiciel ou une bibliothèque externe à CATIA~V5. & Exécution sur poste standard sans installation. \\
+        \hline
+        \rowcolor{rowlight}
+        Fiabilité & Taux de faux positifs $\leq$ 5\,\% sur modèles conformes. & Validation sur modèles certifiés conformes. \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  SECTION III — DIAGRAMME SIPOC
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Diagramme SIPOC}
+
+Le diagramme SIPOC (\textit{Suppliers -- Inputs -- Process -- Outputs -- Customers}) offre une vue synthétique du processus cible : la vérification qualité automatisée des modèles CATIA~V5. Il permet de délimiter le périmètre du projet et d'identifier les flux d'information entre les acteurs.
+
+\begin{table}[H]
+    \centering
+    \caption{Diagramme SIPOC — Vérification qualité automatisée des modèles CATIA}
+    \label{tab:sipoc}
+    \renewcommand{\arraystretch}{1.5}
+    \begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+        \hline
+        \rowcolor{headerblue}
+        \textcolor{white}{\textbf{Suppliers}} &
+        \textcolor{white}{\textbf{Inputs}} &
+        \textcolor{white}{\textbf{Process}} &
+        \textcolor{white}{\textbf{Outputs}} &
+        \textcolor{white}{\textbf{Customers}} \\
+        \hline
+        \rowcolor{rowlight}
+        Ingénieurs concepteurs &
+        Fichiers \texttt{.CATPart} et \texttt{.CATProduct} &
+        Exécution de la macro Q-Checker dans CATIA~V5 &
+        Rapport de conformité (liste de non-conformités) &
+        Responsable qualité \\
+        \hline
+        \rowcolor{rowwhite}
+        Responsable qualité &
+        Règles métier et conventions de nommage &
+        Vérification du nommage \texttt{XXX-NNNN} &
+        Statut Conforme / Non-conforme par pièce &
+        Ingénieurs concepteurs \\
+        \hline
+        \rowcolor{rowlight}
+        Système PDM / PLM &
+        Spécifications de tolérance géométrique &
+        Contrôle du volume solide (SPAWorkbench) &
+        Liste des pièces à corriger avec cause &
+        Métiers aval (FAO, FEA) \\
+        \hline
+        \rowcolor{rowwhite}
+        Normes internes Segula &
+        Paramètres de qualité surfacique &
+        Détection d'auto-intersections (Try-to-Join) &
+        Fichier Excel de rapport exporté &
+        Système PDM / PLM \\
+        \hline
+        \rowcolor{rowlight}
+        & &
+        Détection de vrillage (\textit{Twist}) &
+        & \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  SECTION IV — PROBLÉMATIQUE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Problématique}
+
+Dans le cadre de la conception assistée par ordinateur (CAO) au sein de Segula Technologies Maroc, le contrôle qualité des modèles CATIA constitue une étape cruciale avant toute livraison aux métiers aval (simulation, fabrication, industrialisation). Or, ce processus de vérification repose actuellement en grande partie sur des contrôles manuels, effectués pièce par pièce par les ingénieurs concepteurs.
+
+Cette approche présente plusieurs limites majeures :
+
+\begin{itemize}
+    \item[•] \textbf{Temps de vérification considérable :} le contrôle manuel d'un assemblage complexe peut prendre plusieurs heures, voire des jours, mobilisant des ressources humaines précieuses.
+    \item[•] \textbf{Risque d'erreur humaine :} certaines non-conformités subtiles (auto-intersection, vrillage, nomenclature incorrecte) peuvent passer inaperçues lors d'une inspection visuelle.
+    \item[•] \textbf{Manque de traçabilité :} en l'absence de rapports automatisés, il est difficile de suivre l'historique des contrôles et de garantir la reproductibilité des vérifications.
+    \item[•] \textbf{Confidentialité des documents :} la complexité d'accès aux normes et spécifications clients rend la standardisation des contrôles encore plus difficile.
+\end{itemize}
+
+\textbf{La problématique centrale} de ce projet peut donc se formuler ainsi :
+
+\begin{center}
+    \fbox{\parbox{0.85\textwidth}{\centering\itshape
+    Comment automatiser le contrôle qualité des modèles CATIA afin de garantir la conformité des livrables aux règles métier, tout en réduisant le temps de vérification et les risques d'erreur humaine ?
+    }}
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  SECTION V — PÉRIMÈTRE DU PROJET
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Périmètre du projet}
+
+La délimitation du périmètre est indispensable pour concentrer les efforts sur les non-conformités les plus critiques et les plus fréquentes, et pour éviter toute dérive de scope.
+
+\begin{table}[H]
+    \centering
+    \caption{Périmètre du projet — In-scope et Out-of-scope}
+    \label{tab:perimetre}
+    \begin{tabularx}{\textwidth}{|>{\centering\bfseries\arraybackslash}p{3.5cm}|X|}
+        \hline
+        \rowcolor{headerblue}
+        \textcolor{white}{\textbf{Statut}} & \centering\textcolor{white}{\textbf{Éléments}} \tabularnewline
+        \hline
+        \rowcolor{rowlight}
+        \textcolor{ensablue}{Dans le périmètre} &
+        \begin{itemize}[leftmargin=*, nosep, topsep=2pt, partopsep=0pt, label=\textbullet]
+            \item Fichiers \texttt{.CATPart} et \texttt{.CATProduct} CATIA~V5
+            \item Vérification de la convention de nommage \texttt{XXX-NNNN}
+            \item Contrôle de la solidité et du volume (PartBody non vide)
+            \item Détection d'auto-intersections surfaciques
+            \item Détection de vrillage (\textit{Twist}) sur surfaces
+            \item Génération d'un rapport de conformité structuré
+            \item Tests de validation sur projets réels Segula
+        \end{itemize} \\
+        \hline
+        \rowcolor{rowwhite}
+        \textcolor{red!70!black}{Hors périmètre} &
+        \begin{itemize}[leftmargin=*, nosep, topsep=2pt, partopsep=0pt, label=\textbullet]
+            \item Fichiers issus d'autres logiciels CAO (CATIA~V6, NX, SolidWorks)
+            \item Contrôle des plans 2D (\texttt{.CATDrawing})
+            \item Vérification des paramètres de simulation (FEA/FAO)
+            \item Intégration directe dans le système PDM/PLM (hors scope immédiat)
+            \item Correction automatique des non-conformités (la macro détecte, ne corrige pas)
+        \end{itemize} \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  SECTION VI — CHARTE DU PROJET ET CAHIER DES CHARGES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Charte du projet et Cahier des charges}
+
+Le \autoref{tab:charte-projet} présente la charte du projet, qui résume les informations essentielles relatives au cadrage, aux acteurs, aux objectifs et aux contraintes du projet.
+
+\begin{table}[H]
+\centering
+\caption{Charte de projet}
+\label{tab:charte-projet}
+
+\begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{3.8cm}|X|}
+
+\hline
+\rowcolor{headerblue}
+\multicolumn{2}{|c|}{\textcolor{white}{\large\bfseries Charte de projet}} \\
+\hline
+
+\rowcolor{rowlight}
+Entreprise & Segula Technologies Maroc \\
+\hline
+
+\rowcolor{rowwhite}
+Maître d'œuvre & Hamza Ihind \\
+\hline
+
+\rowcolor{rowlight}
+Département & Mécanique \\
+\hline
+
+\rowcolor{rowwhite}
+Objet de projet &
+  Développement des macros CATIA automatisées servant d'outils de Q-Checker métier \\
+\hline
+
+\rowcolor{rowlight}
+Membres d'équipe projet &
+  \begin{minipage}[t]{\linewidth}
+    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
+      \item \mdseries Hamza Ihind -- Réalisation et développement
+      \item \mdseries Anas Elrhazi -- Supervision
+    \end{itemize}
+    \vspace{4pt}
+  \end{minipage} \\
+\hline
+
+\rowcolor{rowwhite}
+Période &
+  \mdseries{Date de départ :} 10/02/2026 \quad\mdseries{|}\quad \mdseries{Date cible :} 10/06/2026 \\
+\hline
+
+\rowcolor{rowlight}
+Enjeux &
+  \begin{minipage}[t]{\linewidth}
+    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
+      \item Respecter le délai
+      \item Respecter les normes métier
+      \item Réduire le temps de contrôle qualité
+    \end{itemize}
+    \vspace{4pt}
+  \end{minipage} \\
+\hline
+
+\rowcolor{rowwhite}
+Objectifs &
+  \begin{minipage}[t]{\linewidth}
+    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
+      \item Analyse des règles métier CATIA à contrôler
+      \item Définition des critères de conformité
+      \item Développement de macros CATIA (VBA / CATScript) pour :
+        \begin{itemize}[leftmargin=1.5em, nosep, topsep=2pt, label=\textbullet]
+          \item Détecter les non-conformités
+          \item Générer des rapports automatiques
+        \end{itemize}
+      \item Tests sur des cas réels projets
+      \item Amélioration continue des macros selon retours utilisateurs
+    \end{itemize}
+    \vspace{4pt}
+  \end{minipage} \\
+\hline
+
+\rowcolor{rowlight}
+Contraintes &
+  \begin{minipage}[t]{\linewidth}
+    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
+      \item Complexité d'accès aux documents nécessaires vu la confidentialité
+    \end{itemize}
+    \vspace{4pt}
+  \end{minipage} \\
+\hline
+
+\rowcolor{rowwhite}
+Hypothèses de réussite &
+  \begin{minipage}[t]{\linewidth}
+    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
+      \item Les règles métiers sont bien respectées
+      \item Bonne mise en œuvre de la démarche DMAIC
+    \end{itemize}
+    \vspace{4pt}
+  \end{minipage} \\
+\hline
+
+\end{tabularx}
+\end{table}
+
+Le cahier des charges de ce projet se résume aux exigences fonctionnelles et techniques suivantes :
+
+\begin{itemize}
+    \item[•] Les macros doivent fonctionner dans l'environnement CATIA~V5 sans installation de logiciel tiers.
+    \item[•] Chaque macro doit être autonome et pouvoir être exécutée indépendamment.
+    \item[•] Les résultats doivent être présentés à l'utilisateur sous forme de rapport clair (boîte de dialogue ou fichier exporté).
+    \item[•] Les macros doivent supporter les formats \texttt{.CATPart} (pièce) et \texttt{.CATProduct} (assemblage).
+    \item[•] Le temps d'exécution doit rester acceptable même sur des assemblages de taille industrielle.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  SECTION VII — OBJECTIFS DU PROJET
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Objectifs du projet}
+
+\subsection{Objectif principal}
+
+L'objectif principal de ce projet est de \textbf{développer des macros CATIA automatisées} jouant le rôle d'outils de \textbf{Q-Checker métier}, permettant de contrôler automatiquement la conformité des modèles CAO (pièces et assemblages) aux règles métier internes de Segula Technologies Maroc. Ces outils visent à remplacer les vérifications manuelles, souvent chronophages et sujettes aux erreurs humaines, par un processus automatisé, fiable et reproductible.
+
+En d'autres termes, il s'agit de concevoir, développer et valider un ensemble de macros VBA/CATScript intégrées à l'environnement CATIA~V5, capables de détecter les non-conformités géométriques, topologiques et de nomenclature dans les livrables de conception.
+
+\subsection{Objectifs spécifiques}
+
+Pour atteindre l'objectif global, le projet se décline en plusieurs objectifs spécifiques :
+
+\begin{enumerate}
+    \item \textbf{Analyse des règles métier CATIA à contrôler :} identifier et formaliser l'ensemble des critères de conformité imposés par les normes internes et les exigences clients (convention de nommage, qualité surfacique, solidité des modèles, etc.).
+
+    \item \textbf{Définition des critères de conformité :} établir les seuils de tolérance, les expressions régulières de validation et les conditions mathématiques permettant de distinguer un modèle conforme d'un modèle non conforme.
+
+    \item \textbf{Développement des macros de contrôle :} programmer en VBA/CATScript les macros automatisées permettant de :
+    \begin{itemize}
+        \item Détecter les non-conformités de nommage (convention \texttt{XXX-NNNN}).
+        \item Identifier les défauts surfaciques critiques (auto-intersection, vrillage).
+        \item Générer des rapports automatiques de conformité.
+    \end{itemize}
+
+    \item \textbf{Tests et validation sur des cas réels :} valider les macros sur des projets réels de l'entreprise pour s'assurer de leur robustesse et de leur fiabilité.
+
+    \item \textbf{Amélioration continue :} itérer sur les macros en intégrant les retours des utilisateurs métier afin d'optimiser leur ergonomie et leur couverture de contrôle.
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  SECTION VIII — PLANIFICATION DES TÂCHES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Planification des tâches}
+
+La planification du projet s'étend sur une période de quatre mois, du 10 février au 10 juin 2026. Les différentes phases ont été organisées selon la méthodologie DMAIC adoptée.
+
+% TODO : Insérer ici le diagramme de Gantt (image Microsoft Project)
+\begin{center}
+    \textit{[Diagramme de Gantt à insérer]}
+    % \includegraphics[width=\textwidth]{Figures/gantt.png}
+\end{center}

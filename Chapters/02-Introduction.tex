@@ -1,7 +1,7 @@
-\chapter{Présentation de l'organisme d'accueil et contexte du projet}
+﻿﻿﻿\chapter{Présentation de l'organisme d'accueil et contexte du projet}
 \label{cp:introduction}
 
-\textit{Avant de conduire un projet au sein d'une entreprise, il est indispensable d'en appréhender l'organisation et les champs de compétence. Ce chapitre débute par une présentation du groupe Segula Technologies, avec un focus particulier sur sa filiale marocaine, cadre principal du stage. La seconde partie situe le projet dans son contexte en définissant les objectifs, la problématique, la méthodologie adoptée et la planification retenue.}
+\textit{Avant de conduire un projet au sein d'une entreprise, il est indispensable d'en appréhender l'organisation et les champs de compétence. Ce chapitre présente le groupe Segula Technologies, avec un focus particulier sur sa filiale marocaine, cadre principal du stage. Il se conclut par une présentation de la méthodologie DMAIC retenue pour structurer l'ensemble de la démarche projet.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%  SECTION I — SEGULA TECHNOLOGIES
@@ -162,174 +162,9 @@ Le \autoref{tab:clients-partenaires} présente les principaux clients et partena
 \end{table}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%  SECTION II — CONTEXTUALISATION DU PROJET
+%%  SECTION II -- METHODOLOGIE DE TRAVAIL
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Contextualisation du projet}
-
-%% ---- II.1 Objectif ----
-\subsection{Objectif}
-
-L'objectif principal de ce projet est de \textbf{développer des macros CATIA automatisées} jouant le rôle d'outils de \textbf{Q-Checker métier}, permettant de contrôler automatiquement la conformité des modèles CAO (pièces et assemblages) aux règles métier internes de Segula Technologies Maroc. Ces outils visent à remplacer les vérifications manuelles, souvent chronophages et sujettes aux erreurs humaines, par un processus automatisé, fiable et reproductible.
-
-En d'autres termes, il s'agit de concevoir, développer et valider un ensemble de macros VBA/CATScript intégrées à l'environnement CATIA V5, capables de détecter les non-conformités géométriques, topologiques et de nomenclature dans les livrables de conception.
-
-%% ---- II.2 Objectifs spécifiques ----
-\subsection{Objectifs spécifiques}
-
-Pour atteindre l'objectif global, le projet se décline en plusieurs objectifs spécifiques :
-
-\begin{enumerate}
-    \item \textbf{Analyse des règles métier CATIA à contrôler :} identifier et formaliser l'ensemble des critères de conformité imposés par les normes internes et les exigences clients (convention de nommage, qualité surfacique, solidité des modèles, etc.).
-
-    \item \textbf{Définition des critères de conformité :} établir les seuils de tolérance, les expressions régulières de validation et les conditions mathématiques permettant de distinguer un modèle conforme d'un modèle non conforme.
-
-    \item \textbf{Développement des macros de contrôle :} programmer en VBA/CATScript les macros automatisées permettant de :
-    \begin{itemize}
-        \item Détecter les non-conformités de nommage (convention \texttt{XXX-0000}).
-        \item Identifier les défauts surfaciques critiques (auto-intersection, vrillage).
-        \item Générer des rapports automatiques de conformité.
-    \end{itemize}
-
-    \item \textbf{Tests et validation sur des cas réels :} valider les macros sur des projets réels de l'entreprise pour s'assurer de leur robustesse et de leur fiabilité.
-
-    \item \textbf{Amélioration continue :} itérer sur les macros en intégrant les retours des utilisateurs métier afin d'optimiser leur ergonomie et leur couverture de contrôle.
-\end{enumerate}
-
-%% ---- II.3 Problématique ----
-\subsection{Problématique}
-
-Dans le cadre de la conception assistée par ordinateur (CAO) au sein de Segula Technologies Maroc, le contrôle qualité des modèles CATIA constitue une étape cruciale avant toute livraison aux métiers aval (simulation, fabrication, industrialisation). Or, ce processus de vérification repose actuellement en grande partie sur des contrôles manuels, effectués pièce par pièce par les ingénieurs concepteurs.
-
-Cette approche présente plusieurs limites majeures :
-
-\begin{itemize}
-    \item[�] \textbf{Temps de vérification considérable :} le contrôle manuel d'un assemblage complexe peut prendre plusieurs heures, voire des jours, mobilisant des ressources humaines précieuses.
-    \item[�] \textbf{Risque d'erreur humaine :} certaines non-conformités subtiles (auto-intersection, vrillage, nomenclature incorrecte) peuvent passer inaperçues lors d'une inspection visuelle.
-    \item[�] \textbf{Manque de traçabilité :} en l'absence de rapports automatisés, il est difficile de suivre l'historique des contrôles et de garantir la reproductibilité des vérifications.
-    \item[�] \textbf{Confidentialité des documents :} la complexité d'accès aux normes et spécifications clients rend la standardisation des contrôles encore plus difficile.
-\end{itemize}
-
-\textbf{La problématique centrale} de ce projet peut donc se formuler ainsi :
-
-\begin{center}
-\textit{Comment automatiser le contrôle qualité des modèles CATIA afin de garantir la conformité des livrables aux règles métier, tout en réduisant le temps de vérification et les risques d'erreur humaine ?}
-\end{center}
-
-%% ---- II.4 Charte du projet et Cahier des charges ----
-\subsection{Charte du projet et Cahier des charges}
-
-Le \autoref{tab:charte-projet} présente la charte du projet, qui résume les informations essentielles relatives au cadrage, aux acteurs, aux objectifs et aux contraintes du projet.
-
-\begin{table}[H]
-\centering
-\caption{Charte de projet}
-\label{tab:charte-projet}
-
-\begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{3.8cm}|X|}
-
-\hline
-\rowcolor{headerblue}
-\multicolumn{2}{|c|}{\textcolor{white}{\large\bfseries Charte de projet}} \\
-\hline
-
-\rowcolor{rowlight}
-Entreprise & Segula Technologies Maroc \\
-\hline
-
-\rowcolor{rowwhite}
-Maître d'œuvre & Hamza Ihind \\
-\hline
-
-\rowcolor{rowlight}
-Département & Mécanique \\
-\hline
-
-\rowcolor{rowwhite}
-Objet de projet &
-  Développement des macros CATIA automatisées servant d'outils de Q-Checker métier \\
-\hline
-
-\rowcolor{rowlight}
-Membres d'équipe projet &
-  \begin{minipage}[t]{\linewidth}
-    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
-      \item \mdseries Hamza Ihind -- Réalisation et développement
-      \item \mdseries Anas Elrhazi -- Supervision
-    \end{itemize}
-    \vspace{4pt}
-  \end{minipage} \\
-\hline
-
-\rowcolor{rowwhite}
-Période &
-  \mdseries{Date de départ :} 10/02/2026 \quad\mdseries{|}\quad \mdseries{Date cible :} 10/06/2026 \\
-\hline
-
-\rowcolor{rowlight}
-Enjeux &
-  \begin{minipage}[t]{\linewidth}
-    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
-      \item Respecter le délai
-      \item Respecter les normes
-    \end{itemize}
-    \vspace{4pt}
-  \end{minipage} \\
-\hline
-
-\rowcolor{rowwhite}
-Objectifs &
-  \begin{minipage}[t]{\linewidth}
-    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
-      \item Analyse des règles métier CATIA à contrôler
-      \item Définition des critères de conformité
-      \item Développement de macros CATIA (VBA / CATScript) pour :
-        \begin{itemize}[leftmargin=1.5em, nosep, topsep=2pt, label=\textbullet]
-          \item Détecter les non-conformités
-          \item Générer des rapports automatiques
-        \end{itemize}
-      \item Tests sur des cas réels projets
-      \item Amélioration continue des macros selon retours utilisateurs
-    \end{itemize}
-    \vspace{4pt}
-  \end{minipage} \\
-\hline
-
-\rowcolor{rowlight}
-Contraintes &
-  \begin{minipage}[t]{\linewidth}
-    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
-      \item Complexité d'accès aux documents nécessaires vu la confidentialité
-    \end{itemize}
-    \vspace{4pt}
-  \end{minipage} \\
-\hline
-
-\rowcolor{rowwhite}
-Hypothèses de réussite &
-  \begin{minipage}[t]{\linewidth}
-    \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
-      \item Les règles métiers sont bien respectées
-      \item Bonne mise en œuvre de la démarche DMAIC
-    \end{itemize}
-    \vspace{4pt}
-  \end{minipage} \\
-\hline
-
-\end{tabularx}
-\end{table}
-
-Le cahier des charges de ce projet se résume aux exigences fonctionnelles et techniques suivantes :
-
-\begin{itemize}
-    \item[�] Les macros doivent fonctionner dans l'environnement CATIA V5 sans installation de logiciel tiers.
-    \item[�] Chaque macro doit être autonome et pouvoir être exécutée indépendamment.
-    \item[�] Les résultats doivent être présentés à l'utilisateur sous forme de rapport clair (boîte de dialogue ou fichier exporté).
-    \item[�] Les macros doivent supporter les formats \texttt{.CATPart} (pièce) et \texttt{.CATProduct} (assemblage).
-    \item[�] Le temps d'exécution doit rester acceptable même sur des assemblages de taille industrielle.
-\end{itemize}
-
-%% ---- II.5 Méthodologie de travail ----
-\subsection{Méthodologie de travail}
+\section{Méthodologie de travail}
 
 \subsubsection{Choix de la démarche appropriée}
 
@@ -395,14 +230,3 @@ Pour mener à bien ce projet, plusieurs outils logiciels ont été mobilisés, c
     \textit{Rédaction structurée du rapport\\avec gestion automatique des références}
 \end{minipage}
 \end{figure}
-
-%% ---- II.6 Planification des tâches ----
-\subsection{Planification des tâches}
-
-La planification du projet s'étend sur une période de quatre mois, du 10 février au 10 juin 2026. Les différentes phases ont été organisées selon la méthodologie DMAIC adoptée.
-
-% TODO : Insérer ici le diagramme de Gantt (image Microsoft Project)
-\begin{center}
-    \textit{[Diagramme de Gantt à insérer]}
-    % \includegraphics[width=\textwidth]{Figures/gantt.png}
-\end{center}
