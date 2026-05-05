@@ -169,6 +169,7 @@
 \RequirePackage{soul} % A better underline.
 \RequirePackage{mfirstuc} % Capitalise words in a sentence.
 \RequirePackage{tikz} % Create high-quality graphics programmatically.
+\usetikzlibrary{positioning,shapes.geometric} % Node positioning and geometric shapes for flowcharts.
 \RequirePackage{psvectorian} % To include in-text ornamatentions. 
 \RequirePackage{blindtext} % Generate placeholder text.
 

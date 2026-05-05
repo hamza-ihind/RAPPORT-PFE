@@ -501,4 +501,154 @@ La macro de détection permet d'identifier ces zones critiques avant toute trans
     % \includegraphics[width=0.8\textwidth]{Figures/flowchart-vrillage.png}
 \end{center}
 
+%% ============================================================
+%%  SLIVER FACES
+%% ============================================================
+\section{Faces en Éclat (\textit{Sliver Faces})}
+
+\subsection{Définition et contexte}
+
+Une \textbf{sliver face} est une face géométrique extrêmement fine, étroite, ou en forme d'aiguille, qui apparaît lors de la modélisation, de l'import ou de l'export de fichiers CAO dans CATIA~V5.
+
+Les caractéristiques typiques d'une sliver face sont les suivantes :
+
+\begin{itemize}
+    \item[•] Ratio longueur/largeur extrêmement élevé (ex.\ 100~mm de long pour 0{,}001~mm de large).
+    \item[•] Aire quasi nulle mais non nulle.
+    \item[•] Souvent \textbf{invisible} dans la vue 3D normale (détectable uniquement par une analyse géométrique dédiée).
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{image/SILVER-FACE/def-1.png}
+    \hfill
+    \includegraphics[width=0.48\textwidth]{image/SILVER-FACE/def-2.png}
+    \caption{Illustration d'une sliver face : face ultra-fine quasiment invisible dans la vue 3D (gauche) et mise en évidence par l'analyse géométrique (droite).}
+    \label{fig:sliver-face-def}
+\end{figure}
+
+\subsection{Causes géométriques.}
+
+La cause principale des sliver faces est la \textbf{quasi-coïncidence} : deux entités géométriques (arêtes, faces, surfaces) censées être identiques présentent un écart infime dû à l'un des facteurs suivants :
+
+\begin{itemize}
+    \item[•] Des \textbf{tolérances de modélisation différentes} entre logiciels (CATIA vs.\ SolidWorks vs.\ STEP).
+    \item[•] Des \textbf{conversions de format} qui arrondissent les coordonnées (IGES $\rightarrow$ CATIA).
+    \item[•] Des \textbf{imprécisions numériques} dans les calculs en virgule flottante.
+    \item[•] Des \textbf{opérations booléennes imparfaites} (Join, Trim, Split) laissant un micro-écart là où deux surfaces devraient se toucher exactement.
+\end{itemize}
+
+Le \autoref{tab:causes-sliver} illustre les situations concrètes dans lesquelles une sliver face peut apparaître dans CATIA~V5.
+
+\begin{table}[H]
+    \centering
+    \caption{Situations concrètes générant des sliver faces dans CATIA~V5}
+    \label{tab:causes-sliver}
+    \begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{3.8cm}|X|}
+        \hline
+        \rowcolor{headerblue}
+        \textcolor{white}{\textbf{Situation}} & \centering\textcolor{white}{\textbf{Mécanisme d'apparition}} \tabularnewline
+        \hline
+        \rowcolor{rowlight}
+        Import IGES / STEP & Les coordonnées sont arrondies lors de la conversion : deux surfaces qui devaient coïncider ne le font plus exactement, laissant un interstice infime. \\
+        \hline
+        \rowcolor{rowwhite}
+        Join de deux surfaces & Un micro-écart entre les bords libres des deux surfaces se traduit par une face de jonction ultra-fine générée par le noyau géométrique. \\
+        \hline
+        \rowcolor{rowlight}
+        Offset d'une surface complexe & Des zones à forte courbure créent des faces dégénérées très étroites lors du décalage, notamment sur les congés serrés. \\
+        \hline
+        \rowcolor{rowwhite}
+        Trim / Split imprécis & Le plan de coupe laisse une face résiduelle quasi nulle là où la découpe n'est pas parfaitement alignée avec la géométrie. \\
+        \hline
+        \rowcolor{rowlight}
+        Copie-miroir & Un arrondi numérique introduit un infime décalage entre la géométrie d'origine et son symétrique, créant une face résiduelle à la jonction. \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\begin{block}[note]
+\textbf{IGES} (\textit{Initial Graphics Exchange Specification}) et \textbf{STEP} (\textit{Standard for the Exchange of Product model data}) sont les deux formats d'échange de fichiers CAO les plus utilisés dans l'industrie pour transférer des modèles 3D entre logiciels différents (CATIA, SolidWorks, Creo, etc.). Lors de cette conversion, les coordonnées géométriques sont arrondies selon les tolérances propres à chaque logiciel, ce qui peut introduire des micro-écarts à l'origine des sliver faces.
+\end{block}
+
+\subsection{Justification métier}
+
+Bien qu'imperceptible visuellement, une sliver face a des conséquences directes et bloquantes sur toutes les opérations métier en aval. Le \autoref{tab:impacts-sliver} synthétise les principaux impacts identifiés.
+
+\begin{table}[H]
+    \centering
+    \caption{Conséquences industrielles des sliver faces par domaine métier}
+    \label{tab:impacts-sliver}
+    \begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{3.8cm}|X|}
+        \hline
+        \rowcolor{headerblue}
+        \textcolor{white}{\textbf{Opération impactée}} & \centering\textcolor{white}{\textbf{Problème causé par la sliver face}} \tabularnewline
+        \hline
+        \rowcolor{rowlight}
+        Opérations booléennes (Join, Coupure) & Échec de l'opération ou résultat géométriquement incohérent dû à la topologie dégénérée de la face. \\
+        \hline
+        \rowcolor{rowwhite}
+        Maillage FEA & Les éléments maillés sur la sliver face sont dégénérés, rendant la simulation numérique invalide. \\
+        \hline
+        \rowcolor{rowlight}
+        Impression 3D / STL & Le fichier STL contient des triangles dégénérés issus de la face, rendant la pièce non imprimable. \\
+        \hline
+        \rowcolor{rowwhite}
+        Offset / Thick Surface & CATIA ne peut pas épaissir une face dont la largeur est quasi nulle : l'opération échoue ou produit une géométrie aberrante. \\
+        \hline
+        \rowcolor{rowlight}
+        FAO (trajectoires outil) & L'outil de coupe tente d'usiner une face quasi inexistante, générant des trajectoires erronées et des risques de collision. \\
+        \hline
+        \rowcolor{rowwhite}
+        Contrôle qualité Q-Checker & La face passe sous le seuil minimal d'aire défini dans les règles du projet --- elle est flaggée comme défaut critique bloquant. \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\begin{block}[note]
+Une sliver face non détectée avant la livraison des données peut bloquer la FAO, la simulation et l'impression 3D. La détecter automatiquement dès la conception permet d'éviter des reprises coûteuses en phase tardive.
+\end{block}
+
+\subsection{Stratégies de correction}
+
+Une fois les sliver faces identifiées, le choix de la stratégie de correction dépend de leur origine et de leur localisation dans le modèle. Le \autoref{tab:correction-sliver} présente les actions correctives recommandées dans les cas les plus fréquents.
+
+\begin{table}[H]
+    \centering
+    \caption{Stratégies de correction des sliver faces dans CATIA~V5}
+    \label{tab:correction-sliver}
+    \begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{3.8cm}|X|}
+        \hline
+        \rowcolor{headerblue}
+        \textcolor{white}{\textbf{Cas}} & \centering\textcolor{white}{\textbf{Action corrective dans CATIA~V5}} \tabularnewline
+        \hline
+        \rowcolor{rowlight}
+        Sliver sur import IGES/STEP & Utiliser le \textbf{Healing} : \textit{Insert $\rightarrow$ Operations $\rightarrow$ Healing} pour combler automatiquement les micro-écarts entre surfaces. \\
+        \hline
+        \rowcolor{rowwhite}
+        Micro-écart entre deux surfaces & Effectuer un \textit{Join} avec l'option \textit{Check tangency} désactivée et une tolérance augmentée pour forcer la fusion des bords proches. \\
+        \hline
+        \rowcolor{rowlight}
+        Face résiduelle après Trim & Supprimer la face manuellement (\textit{Delete Face}) puis reconstruire la zone proprement avec un \textit{Fill}. \\
+        \hline
+        \rowcolor{rowwhite}
+        Offset générant des slivers & Réduire la valeur d'offset ou segmenter la surface avant l'opération afin d'éviter les zones à forte courbure. \\
+        \hline
+        \rowcolor{rowlight}
+        Import répété avec slivers & Nettoyer le fichier source dans le logiciel d'origine (SolidWorks, Creo, etc.) avant l'export, en resserrant les tolérances de modélisation. \\
+        \hline
+        \rowcolor{rowwhite}
+        Sliver quasi-dégénérée (aire $\approx 0$) & Utiliser \textit{Delete Face} puis \textit{Fill} pour reconstruire la zone de manière géométriquement propre. \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\subsection{Limites de la méthode}
+
+\begin{itemize}
+    \item[•] \textbf{Subjectivité du seuil} --- Une face de 0{,}005~mm² peut constituer une sliver face dans un contexte, et une feature intentionnelle dans un autre (congé minuscule, point de contact). La macro doit impérativement permettre à l'utilisateur de paramétrer ce seuil selon le contexte du projet.
+    \item[•] \textbf{Accès face par face limité} --- L'API VBS ne permet pas toujours de descendre au niveau de chaque face individuelle d'une surface composite. La macro analyse les objets \texttt{HybridShape} et non leurs faces topologiques internes, ce qui peut laisser des sliver faces internes non détectées.
+    \item[•] \textbf{Faux positifs} --- Certaines features intentionnellement petites (micro-congés, surfaces de contact ponctuel) peuvent être signalées à tort comme des sliver faces si le seuil n'est pas correctement calibré.
+\end{itemize}
+
 

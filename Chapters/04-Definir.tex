@@ -1,63 +1,27 @@
-\chapter{Définir}
+% chktex-file 1
+% chktex-file 6
+% chktex-file 26
+% chktex-file 44
+\chapter{Définir}%
 \label{cp:definir}
 
-\textit{La phase \textbf{Définir} constitue le point de départ de la démarche DMAIC. Elle vise à cadrer rigoureusement le projet en identifiant le problème, en formalisant les besoins des parties prenantes, en délimitant le périmètre d'intervention et en fixant les objectifs mesurables à atteindre. Les livrables produits dans cette phase — charte de projet, SIPOC, VOC/CTQ, cahier des charges — servent de référence tout au long du cycle DMAIC.}
+\textit{La phase \textbf{Définir} constitue le point de départ de la démarche DMAIC\@. Elle vise à cadrer rigoureusement le projet en identifiant le problème, en formalisant les besoins des parties prenantes, en délimitant le périmètre d'intervention et en fixant les objectifs mesurables à atteindre. Les livrables produits dans cette phase — charte de projet, SIPOC, VOC/CTQ, cahier des charges — servent de référence tout au long du cycle DMAIC\@.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%  SECTION I — DESCRIPTION DU PROCESSUS ACTUEL
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Description du processus actuel}
 
-\subsection{État des lieux : le contrôle qualité CATIA actuel}
-
 Dans l'environnement de conception actuel de Segula Technologies Maroc, le processus de contrôle qualité des modèles CATIA~V5 repose intégralement sur des vérifications manuelles. À chaque jalon de projet, un ingénieur concepteur inspecte visuellement chaque fichier \texttt{.CATPart} ou \texttt{.CATProduct}, en parcourant l'arbre de spécifications et en consultant les propriétés de la pièce pour détecter d'éventuelles non-conformités.
 
 Ce processus manuel présente plusieurs limites majeures :
 
 \begin{itemize}
-    \item[•] \textbf{Temps de vérification considérable :} le contrôle d'un assemblage complexe peut prendre plusieurs heures, voire des jours, mobilisant des ressources humaines précieuses.
-    \item[•] \textbf{Risque d'erreur humaine :} certaines non-conformités subtiles (auto-intersection, vrillage, nomenclature incorrecte) peuvent passer inaperçues lors d'une inspection visuelle.
+    \item[•] \textbf{Temps de vérification considérable:} le contrôle d'un assemblage complexe peut prendre plusieurs heures, voire des jours, mobilisant des ressources humaines précieuses.
+    \item[•] \textbf{Risque d'erreur humaine:} certaines non-conformités subtiles peuvent passer inaperçues lors d'une inspection visuelle.
     \item[•] \textbf{Manque de traçabilité :} en l'absence de rapports automatisés, il est difficile de suivre l'historique des contrôles et de garantir la reproductibilité des vérifications.
     \item[•] \textbf{Absence de standardisation :} chaque ingénieur applique ses propres critères de contrôle, en l'absence d'une procédure unifiée et vérifiable.
 \end{itemize}
-
-\subsection{Logigramme du processus de vérification actuel}
-
-Le \autoref{fig:logigramme-actuel} illustre les étapes séquentielles du processus de vérification manuelle tel qu'il est pratiqué aujourd'hui.
-
-\begin{figure}[H]
-    \centering
-    \begin{tikzpicture}[
-        node distance=1.2cm and 0.5cm,
-        startstop/.style={rectangle, rounded corners, minimum width=3.5cm, minimum height=0.8cm,
-            text centered, draw=ensablue, fill=ensablue!15, font=\small\bfseries},
-        process/.style={rectangle, minimum width=4.5cm, minimum height=0.8cm,
-            text centered, draw=ensablue!70, fill=ensablue!8, font=\small},
-        decision/.style={diamond, aspect=2.5, minimum width=4cm, minimum height=0.8cm,
-            text centered, draw=orange!80!black, fill=orange!12, font=\small},
-        arrow/.style={thick, ->, >=stealth}
-    ]
-        \node (start)   [startstop]                         {Réception du modèle CATIA};
-        \node (open)    [process, below=of start]           {Ouverture du fichier \texttt{.CATPart} / \texttt{.CATProduct}};
-        \node (naming)  [decision, below=of open]           {Nommage conforme ?};
-        \node (solid)   [decision, below=of naming]         {Part solide et plein ?};
-        \node (topo)    [decision, below=of solid]          {Défauts topologiques ?};
-        \node (report)  [process, below=of topo]            {Rédaction manuelle du rapport};
-        \node (deliver) [startstop, below=of report]        {Livraison ou retour en correction};
-
-        \draw [arrow] (start)   -- (open);
-        \draw [arrow] (open)    -- (naming);
-        \draw [arrow] (naming)  -- node[right,font=\scriptsize]{Oui} (solid);
-        \draw [arrow] (naming.east) -- ++(2,0) node[right,font=\scriptsize]{Non → correction} |- (open.east);
-        \draw [arrow] (solid)   -- node[right,font=\scriptsize]{Oui} (topo);
-        \draw [arrow] (solid.east) -- ++(2,0) node[right,font=\scriptsize]{Non → correction} |- (open.east);
-        \draw [arrow] (topo)    -- node[right,font=\scriptsize]{Non} (report);
-        \draw [arrow] (topo.east) -- ++(2,0) node[right,font=\scriptsize]{Oui → correction} |- (open.east);
-        \draw [arrow] (report)  -- (deliver);
-    \end{tikzpicture}
-    \caption{Logigramme du processus de vérification qualité CATIA actuel (manuel)}
-    \label{fig:logigramme-actuel}
-\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%  SECTION II — VOIX DU CLIENT (VOC) ET CTQ
@@ -70,12 +34,12 @@ Le \autoref{tab:parties-prenantes} recense les principales parties prenantes du 
 
 \begin{table}[H]
     \centering
-    \caption{Parties prenantes du projet}
+    \caption{Parties prenantes du projet}%
     \label{tab:parties-prenantes}
     \begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{4cm}|X|>{\centering\arraybackslash}p{2.5cm}|}
         \hline
         \rowcolor{headerblue}
-        \textcolor{white}{\textbf{Partie prenante}} & \centering\textcolor{white}{\textbf{Rôle / Intérêt}} & \textcolor{white}{\textbf{Niveau}} \tabularnewline
+        \textcolor{white}{\textbf{Partie prenante}} & \centering\textcolor{white}{\textbf{Rôle / Intérêt}} & \textcolor{white}{\textbf{Niveau}}\tabularnewline
         \hline
         \rowcolor{rowlight}
         Ingénieurs concepteurs & Utilisateurs directs des macros ; ont besoin de retours rapides sur la conformité de leurs modèles. & Élevé \\
@@ -87,7 +51,7 @@ Le \autoref{tab:parties-prenantes} recense les principales parties prenantes du 
         Métiers aval (FAO, FEA) & Reçoivent les modèles pour simulation ou fabrication ; exigent des fichiers sans défaut topologique. & Élevé \\
         \hline
         \rowcolor{rowwhite}
-        Encadrant / Management & Suit l'avancement du projet et valide les livrables aux jalons DMAIC. & Moyen \\
+        Encadrant / Management & Suit l'avancement du projet et valide les livrables aux jalons DMAIC\@. & Moyen \\
         \hline
         \rowcolor{rowlight}
         Système PDM / PLM & Environnement dans lequel circulent les fichiers ; les règles de nommage doivent être compatibles avec ENOVIA/Windchill. & Moyen \\
@@ -112,12 +76,12 @@ La traduction VOC → CTQ permet de transformer les besoins qualitatifs en exige
 
 \begin{table}[H]
     \centering
-    \caption{Exigences CTQ issues de la Voix du Client}
+    \caption{Exigences CTQ issues de la Voix du Client}%
     \label{tab:ctq}
     \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.2cm}|X|>{\raggedright\arraybackslash}p{3.5cm}|}
         \hline
         \rowcolor{headerblue}
-        \textcolor{white}{\textbf{Besoin VOC}} & \centering\textcolor{white}{\textbf{Exigence CTQ}} & \textcolor{white}{\textbf{Indicateur de mesure}} \tabularnewline
+        \textcolor{white}{\textbf{Besoin VOC}} & \centering\textcolor{white}{\textbf{Exigence CTQ}} & \textcolor{white}{\textbf{Indicateur de mesure}}\tabularnewline
         \hline
         \rowcolor{rowlight}
         Rapidité & Temps d'exécution d'une macro $\leq$ 30 secondes par fichier. & Chronomètre sur assemblage de 50 pièces. \\
@@ -133,63 +97,6 @@ La traduction VOC → CTQ permet de transformer les besoins qualitatifs en exige
         \hline
         \rowcolor{rowlight}
         Fiabilité & Taux de faux positifs $\leq$ 5\,\% sur modèles conformes. & Validation sur modèles certifiés conformes. \\
-        \hline
-    \end{tabularx}
-\end{table}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%  SECTION III — DIAGRAMME SIPOC
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Diagramme SIPOC}
-
-Le diagramme SIPOC (\textit{Suppliers -- Inputs -- Process -- Outputs -- Customers}) offre une vue synthétique du processus cible : la vérification qualité automatisée des modèles CATIA~V5. Il permet de délimiter le périmètre du projet et d'identifier les flux d'information entre les acteurs.
-
-\begin{table}[H]
-    \centering
-    \caption{Diagramme SIPOC — Vérification qualité automatisée des modèles CATIA}
-    \label{tab:sipoc}
-    \renewcommand{\arraystretch}{1.5}
-    \begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
-        \hline
-        \rowcolor{headerblue}
-        \textcolor{white}{\textbf{Suppliers}} &
-        \textcolor{white}{\textbf{Inputs}} &
-        \textcolor{white}{\textbf{Process}} &
-        \textcolor{white}{\textbf{Outputs}} &
-        \textcolor{white}{\textbf{Customers}} \\
-        \hline
-        \rowcolor{rowlight}
-        Ingénieurs concepteurs &
-        Fichiers \texttt{.CATPart} et \texttt{.CATProduct} &
-        Exécution de la macro Q-Checker dans CATIA~V5 &
-        Rapport de conformité (liste de non-conformités) &
-        Responsable qualité \\
-        \hline
-        \rowcolor{rowwhite}
-        Responsable qualité &
-        Règles métier et conventions de nommage &
-        Vérification du nommage \texttt{XXX-NNNN} &
-        Statut Conforme / Non-conforme par pièce &
-        Ingénieurs concepteurs \\
-        \hline
-        \rowcolor{rowlight}
-        Système PDM / PLM &
-        Spécifications de tolérance géométrique &
-        Contrôle du volume solide (SPAWorkbench) &
-        Liste des pièces à corriger avec cause &
-        Métiers aval (FAO, FEA) \\
-        \hline
-        \rowcolor{rowwhite}
-        Normes internes Segula &
-        Paramètres de qualité surfacique &
-        Détection d'auto-intersections (Try-to-Join) &
-        Fichier Excel de rapport exporté &
-        Système PDM / PLM \\
-        \hline
-        \rowcolor{rowlight}
-        & &
-        Détection de vrillage (\textit{Twist}) &
-        & \\
         \hline
     \end{tabularx}
 \end{table}
@@ -227,12 +134,12 @@ La délimitation du périmètre est indispensable pour concentrer les efforts su
 
 \begin{table}[H]
     \centering
-    \caption{Périmètre du projet — In-scope et Out-of-scope}
+    \caption{Périmètre du projet — In-scope et Out-of-scope}%
     \label{tab:perimetre}
     \begin{tabularx}{\textwidth}{|>{\centering\bfseries\arraybackslash}p{3.5cm}|X|}
         \hline
         \rowcolor{headerblue}
-        \textcolor{white}{\textbf{Statut}} & \centering\textcolor{white}{\textbf{Éléments}} \tabularnewline
+        \textcolor{white}{\textbf{Statut}} & \centering\textcolor{white}{\textbf{Éléments}}\tabularnewline
         \hline
         \rowcolor{rowlight}
         \textcolor{ensablue}{Dans le périmètre} &
@@ -268,9 +175,8 @@ Le \autoref{tab:charte-projet} présente la charte du projet, qui résume les in
 
 \begin{table}[H]
 \centering
-\caption{Charte de projet}
+\caption{Charte de projet}%
 \label{tab:charte-projet}
-
 \begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{3.8cm}|X|}
 
 \hline
@@ -299,8 +205,8 @@ Objet de projet &
 Membres d'équipe projet &
   \begin{minipage}[t]{\linewidth}
     \begin{itemize}[leftmargin=*, nosep, topsep=0pt, partopsep=0pt, label=\textbullet]
-      \item \mdseries Hamza Ihind -- Réalisation et développement
-      \item \mdseries Anas Elrhazi -- Supervision
+      \item \mdseries Hamza Ihind --- Réalisation et développement
+      \item \mdseries Anas Elrhazi --- Supervision
     \end{itemize}
     \vspace{4pt}
   \end{minipage} \\
