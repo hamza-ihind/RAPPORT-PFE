@@ -154,7 +154,11 @@ Dans le contexte de notre étude, les catégories retenues ont été adaptées a
 \label{fig:ishikawa}
 \end{figure}
 
-%------------------------------------------------------------------
+%==================================================================
+\section{Arbres des causes par type de défaut}
+\label{sec:arbres-causes}
+%==================================================================
+
 \subsection{Arbre des causes par défaut qualité}
 \label{subsec:arbre-causes}
 
@@ -433,4 +437,115 @@ Le quatrième et dernier défaut traité concerne la \textbf{non-conformité de 
 }
 \caption{Arbre des causes --- défaut \textit{Non-conformité de nommage}.}
 \label{fig:arbre-causes-nommage}
+\end{figure}
+
+%==================================================================
+\section{Convention de nommage}
+\label{sec:naming-macro}
+%==================================================================
+
+%------------------------------------------------------------------
+\subsection{Déroulement global de la macro}
+\label{subsec:nm-deroulement}
+
+% TODO : contenu à remplir --- texte descriptif et organigrammes à insérer ici.
+
+%==================================================================
+\section{Compréhension de la macro \texttt{silver\_faces.vbs}}
+\label{sec:silver-faces-macro}
+%==================================================================
+
+%------------------------------------------------------------------
+\subsection{Paramètres de configuration de la macro}
+\label{subsec:sf-constantes}
+
+La macro repose sur trois constantes dont les valeurs pilotent l'ensemble de la logique de détection et de correction :
+
+\begin{table}[htbp]
+\centering
+\caption{Constantes de configuration de \texttt{silver\_faces.vbs}.}
+\label{tab:sf-constantes}
+\begin{tabularx}{\textwidth}{llX}
+\toprule
+\textbf{Constante} & \textbf{Valeur} & \textbf{Signification} \\
+\midrule
+SEUIL\_MM2    & \(0{,}01\ \text{mm}^2\)   & Toute surface dont l'aire est inférieure à ce seuil est considérée comme une silver face. \\
+SEUIL\_DELETE & \(0{,}0001\ \text{mm}^2\) & En dessous de cette valeur, la surface est quasi-nulle et peut être supprimée directement. \\
+HEALING\_DIST & \(0{,}1\ \text{mm}\)       & Distance de fusion utilisée lors de l'opération de Healing : les surfaces distantes de moins de \(0{,}1\ \text{mm}\) sont fusionnées. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+%------------------------------------------------------------------
+\subsection{Déroulement global de la macro}
+\label{subsec:sf-deroulement}
+
+La macro est décomposée en trois étapes principales, décrites ci-après.
+
+\subsubsection{Étape 1: \texttt{CATMain()}}
+\label{subsubsec:sf-catmain}
+
+\begin{enumerate}
+    \item[•] récupère le \textbf{document actif} dans CATIA.
+    \item[•] vérifie son \textbf{type} :
+        \begin{itemize}
+            \item[•] Part seul (\texttt{.CATPart})
+            \item[•] Product (\texttt{.CATProduct})
+        \end{itemize}
+    \item[•] appelle \texttt{ScanPart} pour détecter les silver faces.
+    \item[•] affiche un \textbf{rapport} indiquant le nombre total de surfaces vérifiées, le nombre de silver faces trouvées, leurs noms, emplacements, aires et la stratégie de réparation applicable.
+    \item[•] demande une \textbf{confirmation} à l'utilisateur avant d'appliquer les corrections.
+    \item[•] si l'utilisateur confirme, la Macro appelle \texttt{CorrigerPart} pour effectuer les corrections.
+\end{enumerate}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.85\textheight,keepaspectratio]{image/SILVER-FACE/CatMain_Silver_Face_TD.jpeg}
+    \caption{Organigramme de la fonction \texttt{CATMain()} --- vue globale de la macro.}
+    \label{fig:sf-flowchart-catmain}
+\end{figure}
+
+\subsubsection{Étape 2: \texttt{ScanPart()}}
+\label{subsubsec:sf-scanpart}
+
+Cette fonction inspecte l'ensemble des surfaces du Part et mesure leur aire.
+
+La mesure utilise le \textbf{SPAWorkbench} de CATIA via l'objet \texttt{Measurable}. La propriété \texttt{.Area} est retournée en $\text{m}^2$ puis convertie en $\text{mm}^2$ (× 1\,000\,000).
+
+Pour chaque silver face détectée, sont enregistrés : son nom, le Part et le dossier la contenant, son aire exacte en $\text{mm}^2$, et la stratégie de réparation associée :
+\begin{itemize}
+    \item[•] \textbf{Suppression}: si (l'aire $< 0{,}0001\ \text{mm}^2$).
+    \item[•] \textbf{Healing}: si 
+    ($0{,}0001 \leq \text{aire} < 0{,}01\ \text{mm}^2$).
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.85\textheight,keepaspectratio]{image/SILVER-FACE/ScanPart_Silver_Face_TD.jpeg}
+    \caption{Organigramme de la fonction \texttt{ScanPart()} --- détection des silver faces.}
+    \label{fig:sf-flowchart-scanpart}
+\end{figure}
+
+\subsubsection{Étape 3: \texttt{CorrigerPart()}}
+\label{subsubsec:sf-corriger}
+
+Cette fonction applique deux stratégies de correction automatique.
+
+\paragraph{Suppression directe}
+Appliquée lorsque l'aire est inférieure à $0{,}0001\ \text{mm}^2$. La surface est sélectionnée via \texttt{Selection.Add} puis supprimée par \texttt{Selection.Delete}, reproduisant l'action manuelle d'un utilisateur qui sélectionne et efface l'élément. La boucle se déroule \textbf{en sens inverse} pour éviter la désynchronisation des indices lors des suppressions successives.
+
+\paragraph{Healing}
+Le \textbf{Healing} est un outil de réparation CATIA qui:
+\begin{enumerate}
+    \item[•] prend un ensemble de surfaces ;
+    \item[•] détecte les micro-écarts ou chevauchements entre elles ;
+    \item[•] comble ou ferme ces écarts dans la tolérance \texttt{HEALING\_DIST} = $0{,}1\ \text{mm}$ ;
+    \item[•] produit un groupe de surfaces « guéri » exempt de silver faces.
+\end{enumerate}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.85\textheight,keepaspectratio]{image/SILVER-FACE/Corriger_silver_face_TD.png}
+    \caption{Organigramme de la fonction \texttt{CorrigerPart()} --- stratégies de correction.}
+    \label{fig:sf-flowchart-corriger}
 \end{figure}

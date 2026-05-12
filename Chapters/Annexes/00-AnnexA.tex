@@ -1,19 +1,20 @@
-\chapter{Mots-clés VBS / CATScript}
+\chapter{Mots-clés de l'API CATIA V5}
 
-\noindent Référence des objets et méthodes principaux utilisés dans les macros CATIA~V5 (CATScript / VBScript).
+\noindent Cette annexe recense l'ensemble des objets, méthodes et propriétés issus du modèle objet \textbf{CATIA~V5} qui ont été mobilisés dans le cadre du développement des macros de contrôle qualité présentées dans ce rapport.
+
+
+\vspace{0.8em}
+
+\noindent Le tableau ci-dessous présente chaque mot-clé utilisé accompagné d'une description concise de son rôle. Il constitue une référence technique destinée à faciliter la lecture et la compréhension des macros annexées, en particulier pour un lecteur non familier avec l'API CATIA~V5.
 
 \vspace{1.5em}
 
-% -------------------------------------------------------
-% Table 1 — Objets principaux
-% -------------------------------------------------------
-\begin{longtable}{>{\ttfamily}p{5.5cm} p{9.5cm}}
-  \caption{Objets principaux}\label{annex:catia-1} \\
+\begin{longtable}{|>{\ttfamily}p{4.5cm}|p{11.5cm}|}
+  \caption{Mots-clés de l'API CATIA~V5}\label{annex:catia-api} \\
   \hline
   \normalfont\textbf{Mot-clé} & \textbf{Description} \\
   \hline
   \endfirsthead
-  \multicolumn{2}{r}{\small\textit{(suite\dots)}} \\
   \hline
   \normalfont\textbf{Mot-clé} & \textbf{Description} \\
   \hline
@@ -21,122 +22,42 @@
   \hline
   \endlastfoot
   %
-  CATIA          & Objet racine de l'application CATIA. Point d'entrée de toute macro --- donne accès aux documents, paramètres et sessions. \\[3pt]
-  ActiveDocument & Retourne le document actuellement ouvert et actif dans CATIA (Part, Product, Drawing, etc.). \\[3pt]
-  PartDocument   & Type de document représentant un fichier \normalfont\texttt{.CATPart}. Permet l'accès à la géométrie solide et aux features. \\[3pt]
-  Part           & Objet principal d'un PartDocument. Contient le PartBody, les paramètres, les relations et la géométrie. \\[3pt]
-  MainBody       & Corps solide principal d'un Part (\normalfont\texttt{PartBody}). C'est là où sont stockées toutes les features solides. \\[3pt]
-  Body           & Objet représentant un corps solide (PartBody ou corps secondaire). Contient une collection de shapes/features. \\[3pt]
-  Shapes         & Collection de toutes les features solides (Pad, Shaft, Pocket\dots) contenues dans un Body. \\[3pt]
-  HybridBodies   & Collection des corps hybrides (contenant surfaces + wireframe) dans un Part ou un Body. \\[3pt]
-  HybridShapes   & Collection des éléments surfaciques et filaires (splines, extrusions, fills\dots) dans un HybridBody. \\
-\end{longtable}
-
-\vspace{1em}
-
-% -------------------------------------------------------
-% Table 2 — Mesure & Analyse (SPA)
-% -------------------------------------------------------
-\begin{longtable}{>{\ttfamily}p{5.5cm} p{9.5cm}}
-  \caption{Mesure \& Analyse (SPA)}\label{annex:catia-2} \\
+  CATIA & Objet racine de l'application CATIA~V5. Point d'entrée de toute macro. \\ \hline
+  ActiveDocument & Document actuellement ouvert et actif dans la session CATIA. \\ \hline
+  Documents & Collection de tous les documents ouverts dans la session CATIA. \\ \hline
+  PartDocument & Type de document correspondant à un fichier \normalfont\texttt{.CATPart}. \\ \hline
+  ProductDocument & Type de document correspondant à un fichier \normalfont\texttt{.CATProduct} (assemblage). \\ \hline
+  Part & Objet modèle d'une pièce qui donne accès aux corps solides, surfaces et autres entités. \\ \hline
+  Product & Composant au sein d'un assemblage. Peut contenir d'autres sous-produits. \\ \hline
+  Products & Collection des sous-composants enfants d'un \normalfont\texttt{Product}. \\ \hline
+  PartNumber & Numéro de référence d'un composant dans un assemblage. \\ \hline
+  ReferenceProduct & Référence vers le produit maître d'un composant d'assemblage. \\ \hline
+  Bodies & Collection des corps solides d'une pièce (\normalfont\texttt{Part}). \\ \hline
+  Body & Corps solide contenant des features de modélisation (Pad, Pocket, etc.). \\ \hline
+  Shapes & Collection des features solides contenus dans un \normalfont\texttt{Body}. \\ \hline
+  HybridBodies & Collection des ensembles géométriques (corps de surfaces/courbes) d'une pièce. \\ \hline
+  HybridBody & Ensemble géométrique regroupant des surfaces et courbes. \\ \hline
+  HybridShapes & Collection des formes hybrides contenues dans un \normalfont\texttt{HybridBody}. \\ \hline
+  HybridShape & Surface ou courbe individuelle dans un ensemble géométrique. \\ \hline
+  AddNewJoin & Crée une opération \textbf{Join} (assemblage) dans le modèle. \\ \hline
+  AddNewHeal & Crée une opération \textbf{Healing} destinée à combler les micro-écarts entre surfaces. \\ \hline
+  AddElement & Ajoute une surface à une opération Healing. \\ \hline
+  MergingDistance & Paramètre de l'opération Healing définissant la distance de fusion entre surfaces (en mm). \\ \hline
+  AppendHybridShape & Insère une forme hybride dans un \normalfont\texttt{HybridBody}. \\ \hline
+  SPAWorkbench & Atelier \textit{Space Analysis} de CATIA, utilisé pour mesurer des entités géométriques. \\ \hline
+  GetWorkbench & Méthode permettant d'accéder à un atelier CATIA depuis un document (ex. \normalfont\texttt{SPAWorkbench}). \\ \hline
+  Reference & Objet pointant vers une entité géométrique du modèle, requis par certaines opérations CATIA. \\ \hline
+  CreateReferenceFromObject & Crée un objet \normalfont\texttt{Reference} à partir d'une entité géométrique CATIA. \\ \hline
+  GetMeasurable & Retourne un objet \normalfont\texttt{Measurable} permettant d'interroger les grandeurs géométriques d'une entité. \\ \hline
+  Measurable & Objet d'analyse géométrique exposant des propriétés de mesure (aire, volume, etc.). \\ \hline
+  Area & Aire d'une surface retournée par \normalfont\texttt{Measurable} (exprimée en m$^{2}$ par défaut dans l'API). \\ \hline
+  Volume & Volume d'un solide retourné par \normalfont\texttt{Measurable} (exprimé en m$^{3}$ par défaut dans l'API). \\ \hline
+  Update & Met à jour l'ensemble du modèle géométrique d'une pièce. \\ \hline
+  UpdateObject & Met à jour un objet spécifique du modèle sans recalculer toute la pièce. \\ \hline
+  Selection & Objet de gestion de la sélection active dans CATIA. \\ \hline
+  Selection.Add & Ajoute un élément à la sélection courante. \\ \hline
+  Selection.Clear & Vide la sélection courante. \\ \hline
+  Selection.Delete & Supprime du modèle les éléments actuellement sélectionnés. \\ \hline
+  Parent & Propriété retournant l'objet parent dans la hiérarchie du modèle CATIA. \\
   \hline
-  \normalfont\textbf{Mot-clé} & \textbf{Description} \\
-  \hline
-  \endfirsthead
-  \multicolumn{2}{r}{\small\textit{(suite\dots)}} \\
-  \hline
-  \normalfont\textbf{Mot-clé} & \textbf{Description} \\
-  \hline
-  \endhead
-  \hline
-  \endlastfoot
-  %
-  SPAWorkbench    & Workbench \textit{Space Analysis} de CATIA. Fournit les outils de mesure géométrique (volume, aire, centre de masse). \\[3pt]
-  GetWorkbench()  & Méthode du document pour accéder à un workbench spécifique. Ex : \normalfont\texttt{oDoc.GetWorkbench("SPAWorkbench")}. \\[3pt]
-  GetMeasurable() & Méthode du SPAWorkbench qui crée un objet \normalfont\texttt{Measurable} à partir d'un Body ou d'une surface. \\[3pt]
-  Measurable      & Objet retourné par \normalfont\texttt{GetMeasurable()}. Expose les propriétés de mesure : volume, aire, centre de masse. \\[3pt]
-  .Volume         & Propriété de \normalfont\texttt{Measurable}. Retourne le volume du solide en m$^{3}$ (à convertir en mm$^{3}$ via $\times 10^{9}$). \\[3pt]
-  .Area           & Propriété de \normalfont\texttt{Measurable}. Retourne l'aire totale de la surface du solide en m$^{2}$ ($\times 10^{6}$ pour mm$^{2}$). \\[3pt]
-  GetCOG()        & Méthode de \normalfont\texttt{Measurable}. Retourne les coordonnées du centre de gravité (Center Of Gravity) du solide. \\
-\end{longtable}
-
-\vspace{1em}
-
-% -------------------------------------------------------
-% Table 3 — Surfaces & Géométrie (GSD)
-% -------------------------------------------------------
-\begin{longtable}{>{\ttfamily}p{5.5cm} p{9.5cm}}
-  \caption{Surfaces \& Géométrie (GSD)}\label{annex:catia-3} \\
-  \hline
-  \normalfont\textbf{Mot-clé} & \textbf{Description} \\
-  \hline
-  \endfirsthead
-  \multicolumn{2}{r}{\small\textit{(suite\dots)}} \\
-  \hline
-  \normalfont\textbf{Mot-clé} & \textbf{Description} \\
-  \hline
-  \endhead
-  \hline
-  \endlastfoot
-  %
-  GSMWorkbench              & Workbench \textit{Generative Shape Design}. Donne accès aux outils de création et d'analyse surfacique. \\[3pt]
-  HybridShapeFactory        & Fabrique d'objets surfaciques dans GSD. Permet de créer des surfaces, courbes et points par macro. \\[3pt]
-  Reference                 & Objet qui encapsule une entité géométrique (face, arête, surface) pour l'utiliser dans les méthodes CATIA. \\[3pt]
-  CreateReferenceFromObject() & Crée un objet \normalfont\texttt{Reference} à partir d'un objet géométrique, nécessaire pour beaucoup d'opérations GSD. \\[3pt]
-  SurfaceType               & Propriété indiquant le type d'une surface (plane, cylindrique, NURBS\dots). Utile pour classer les géométries. \\[3pt]
-  Face                      & Représente une face individuelle d'un solide ou d'une surface. Peut être analysée séparément. \\
-\end{longtable}
-
-\vspace{1em}
-
-% -------------------------------------------------------
-% Table 4 — Contrôle de flux VBS
-% -------------------------------------------------------
-\begin{longtable}{>{\ttfamily}p{5.5cm} p{9.5cm}}
-  \caption{Contrôle de flux VBS}\label{annex:catia-4} \\
-  \hline
-  \normalfont\textbf{Mot-clé} & \textbf{Description} \\
-  \hline
-  \endfirsthead
-  \multicolumn{2}{r}{\small\textit{(suite\dots)}} \\
-  \hline
-  \normalfont\textbf{Mot-clé} & \textbf{Description} \\
-  \hline
-  \endhead
-  \hline
-  \endlastfoot
-  %
-  TypeName()    & Fonction VBS qui retourne le type d'un objet sous forme de chaîne. Utilisé pour vérifier si un document est un \normalfont\texttt{PartDocument}. \\[3pt]
-  On Error GoTo & Directive de gestion d'erreurs. Redirige l'exécution vers un label défini si une erreur survient. \\[3pt]
-  MsgBox        & Affiche une boîte de dialogue à l'utilisateur avec un message, une icône et un titre personnalisables. \\[3pt]
-  Set           & Mot-clé VBS pour affecter un objet à une variable. Obligatoire pour tous les objets CATIA (pas les types simples). \\[3pt]
-  Nothing       & Valeur nulle pour les objets VBS. Utilisé en fin de macro pour libérer les références mémoire (\normalfont\texttt{Set obj = Nothing}). \\[3pt]
-  Format()      & Formate un nombre en chaîne de caractères avec un masque. Ex : \normalfont\texttt{Format(val, "\#,\#\#0.000")} pour l'affichage. \\[3pt]
-  Chr(13)       & Caractère retour à la ligne dans une chaîne VBS. Utilisé pour structurer les messages \normalfont\texttt{MsgBox}. \\
-\end{longtable}
-
-\vspace{1em}
-
-% -------------------------------------------------------
-% Table 5 — Sélection & Interaction
-% -------------------------------------------------------
-\begin{longtable}{>{\ttfamily}p{5.5cm} p{9.5cm}}
-  \caption{Sélection \& Interaction}\label{annex:catia-5} \\
-  \hline
-  \normalfont\textbf{Mot-clé} & \textbf{Description} \\
-  \hline
-  \endfirsthead
-  \multicolumn{2}{r}{\small\textit{(suite\dots)}} \\
-  \hline
-  \normalfont\textbf{Mot-clé} & \textbf{Description} \\
-  \hline
-  \endhead
-  \hline
-  \endlastfoot
-  %
-  Selection        & Objet CATIA représentant la sélection active dans l'interface. Permet de récupérer ou définir des éléments sélectionnés. \\[3pt]
-  SelectElement2() & Méthode de \normalfont\texttt{Selection} qui invite l'utilisateur à sélectionner un élément dans l'interface CATIA via un filtre. \\[3pt]
-  Item(i)          & Méthode générique pour accéder au $i$-ème élément d'une collection (Shapes, Bodies, HybridBodies\dots). \\[3pt]
-  .Count           & Propriété de toute collection CATIA. Retourne le nombre d'éléments qu'elle contient. \\[3pt]
-  .Name            & Propriété universelle. Retourne ou définit le nom d'un objet CATIA (Part, Body, feature, etc.). \\
 \end{longtable}
