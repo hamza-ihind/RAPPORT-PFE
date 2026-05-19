@@ -1,9 +1,9 @@
 \chapter{Innover}
 \label{cp:innover}
 
-La phase \textit{Innover} de la démarche DMAIC vise à concevoir des solutions nouvelles permettant de supprimer les causes racines des non-conformités identifiées lors des phases précédentes. Dans ce projet, l'innovation porte sur l'intégration d'un modèle d'apprentissage automatique pour détecter automatiquement les \textit{silver faces} $\bullet$ des surfaces dégénérées difficiles à identifier par une règle déterministe simple.
+La phase \textit{Innover} de la démarche DMAIC vise à concevoir des solutions nouvelles permettant de supprimer les causes racines des non-conformités identifiées lors des phases précédentes. Dans ce projet, l'innovation porte sur l'intégration d'un modèle d'apprentissage automatique pour détecter automatiquement les \textit{silver faces}
 
-Ce chapitre présente l'approche complète : extraction des caractéristiques géométriques, construction du modèle de régression logistique, analyse des performances et recommandations pour la mise en production dans un pipeline CATIA~V5.
+Ce chapitre présente l'approche complète d'extraction des caractéristiques géométriques, construction du modèle de régression logistique, analyse des performances et recommandations pour la mise en production dans un pipeline CATIA~V5.
 
 % ============================================================
 \section{Détection des \textit{Silver Faces} par Régression Logistique}
@@ -13,22 +13,27 @@ Ce chapitre présente l'approche complète : extraction des caractéristiques g�
 \subsection{Problématique}
 \label{subsec:problematique}
 
-La macro existante est entièrement \textbf{basée sur des règles} et utilise exactement \textbf{une seule caractéristique} pour prendre chaque décision~:
+La macro de détection existante dans CATIA~V5, développée empiriquement par l'équipe, repose sur une règle déterministe unique basée sur l'aire de la surface~:
 
 \begin{equation}
-    \text{Aire}\;(\text{mm}^2) < 0{,}01 \;\Rightarrow\; \textit{silver face}
+    A\;(\text{mm}^2) < 0{,}01 \;\Rightarrow\; \text{\textit{silver face}}
     \label{eq:decision-rule-old}
 \end{equation}
 
-Cette approche est fragile. Les deux constantes arbitraires $\bullet$ \texttt{SEUIL\_MM2~=~0.01} et \texttt{SEUIL\_DELETE~=~0.0001} $\bullet$ ont été fixées manuellement par un ingénieur. Elles ne peuvent pas s'adapter~:
+Cette règle est implémentée via deux constantes codées en dur dans la macro:
+\begin{center}
+    \texttt{SEUIL\_MM2 = 0.01} \quad et \quad \texttt{SEUIL\_DELETE = 0.0001}
+\end{center}
 
-\begin{itemize}
-    \item \textbf{Aux domaines industriels différents} $\bullet$ les tolérances aérospatiales et automobiles diffèrent d'ordres de grandeur.
-    \item \textbf{Aux styles de modélisation différents} $\bullet$ les pièces importées en IGES et les pièces modélisées nativement dans CATIA présentent des propriétés géométriques très différentes.
-    \item \textbf{Au contexte} $\bullet$ une surface de $0{,}008~\text{mm}^2$ adjacente à une aube de turbine constitue un \textit{défaut critique}~; la même aire sur un panneau décoratif n'est que du \textit{bruit}.
-\end{itemize}
+Bien que simple à mettre en œuvre, cette approche présente trois limites structurelles qui compromettent sa fiabilité dans un contexte industriel varié~:
 
-L'apprentissage automatique remplace ces seuils figés par une \textbf{fonction de décision apprise} à partir de l'historique réel des corrections.
+\begin{enumerate}
+    \item \textbf{Non-portabilité inter-domaines.} Les tolérances géométriques varient d'ordres de grandeur entre les secteurs aérospatial, automobile et ferroviaire. Un seuil unique ne peut couvrir cette diversité sans générer des faux positifs ou des faux négatifs selon le secteur.
+
+    \item \textbf{Absence de contexte géométrique.} Une surface de $0{,}008~\text{mm}^2$ adjacente à une aube de turbine constitue un défaut critique~; la même valeur sur un panneau de carrosserie peut être du bruit acceptable. La règle actuelle traite tous les cas de manière identique, sans tenir compte de la forme, de l'élongation ni du voisinage de la surface.
+\end{enumerate}
+
+Ces limites plaident pour un remplacement du seuil unique par une \textbf{fonction de décision multi-critères apprise automatiquement} à partir de l'historique réel des corrections. L'apprentissage automatique permet d'intégrer simultanément plusieurs caractéristiques géométriques discriminantes, de s'adapter aux données d'entraînement disponibles et d'offrir une frontière de décision ajustable selon les exigences qualité du contexte.
 
 % ============================================================
 \subsection{Caractéristiques géométriques utilisées}
@@ -37,23 +42,21 @@ L'apprentissage automatique remplace ces seuils figés par une \textbf{fonction 
 
 Quatre indicateurs géométriques sont extraits pour chaque surface afin de capturer sa forme de manière discriminante.
 
-La \textbf{compacité} (ou quotient isopérimétrique) est la métrique la plus puissante. Elle mesure l'écart entre la forme d'une surface et un cercle parfait~:
+La \textbf{compacité} est la métrique la plus puissante. Elle mesure l'écart entre la forme d'une surface et un cercle parfait~:
 
 \begin{equation}
     C = \frac{4\pi A}{P^2}, \qquad C \in (0,\,1]
     \label{eq:compacite}
 \end{equation}
 
-où $A$ désigne l'aire et $P$ le périmètre de la surface. Un cercle parfait donne $C = 1$~; une forme extrêmement allongée ou irrégulière tend vers $C \approx 0$. Le \textbf{rapport d'aspect} complète cette information en mesurant l'élongation directe de la boîte englobante~:
+où $A$ désigne l'aire et $P$ le périmètre de la surface. Le \textbf{rapport d'aspect} complète cette information en mesurant l'élongation directe de la boîte englobante~:
 
 \begin{equation}
     AR = \frac{L_{\max}}{L_{\min}}
     \label{eq:aspect-ratio}
 \end{equation}
 
-où $L_{\max}$ et $L_{\min}$ désignent respectivement la plus grande et la plus petite dimension. Un carré donne $AR = 1$~; une \textit{silver face} typique présente $AR \gg 60$. Enfin, l'\textbf{aire} $A$ (en mm²) et le \textbf{périmètre} $P$ (en mm) fournissent une information brute sur la taille absolue de la surface.
-
-La \autoref{fig:distribution} illustre la distribution de ces quatre caractéristiques sur l'ensemble des~1\,500 surfaces du jeu de données.
+où $L_{\max}$ et $L_{\min}$ désignent respectivement la plus grande et la plus petite dimension.
 
 \begin{figure}[H]
     \centering
@@ -62,7 +65,7 @@ La \autoref{fig:distribution} illustre la distribution de ces quatre caractéris
     \label{fig:distribution}
 \end{figure}
 
-L'analyse de ces distributions révèle que la \textbf{compacité} et le \textbf{rapport d'aspect} sont les caractéristiques les plus discriminantes au premier degré~: les deux classes présentent des distributions quasi disjointes pour ces deux indicateurs. À l'inverse, l'aire et le périmètre offrent une séparation partielle mais insuffisante à eux seuls $\bullet$ ils jouent un rôle d'affinage dans les cas ambigus.
+L’analyse montre que la \textbf{compacité} et le \textbf{rapport d’aspect} sont les variables les plus discriminantes, avec des distributions presque séparées entre les deux classes. À l’inverse, \textbf{l’aire} et le \textbf{périmètre} présentent un recouvrement plus important. Elles sont donc moins efficaces seules, mais restent utiles pour affiner la classification dans les cas ambigus.
 
 % ============================================================
 \subsection{Espace des caractéristiques}
@@ -74,16 +77,16 @@ La \autoref{fig:feature-space} représente la distribution des 1\,500 surfaces d
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{image/AI-SILVER-FACE/fig2_feature_space.png}
-    \caption{Compacité $C$ vs rapport d'aspect $AR$ : cluster \textit{silver face} (rouge) à faible $C$ et $AR$ élevé ; zone ambiguë en beige.}
+    \caption{Compacité $C$ vs rapport d'aspect $AR$}
     \label{fig:feature-space}
 \end{figure}
 
-Dans le plan Compacité $\times$ Rapport d'aspect, les deux classes se séparent nettement~: les \textit{silver faces} occupent la région de faible compacité ($C < 0{,}15$) et de rapport d'aspect élevé ($AR > 60$), tandis que les surfaces saines se concentrent dans la région de forte compacité ($C > 0{,}5$) et de faible rapport d'aspect ($AR < 20$). La zone d'ambiguïté, encadrée en beige, correspond à $C \in [0{,}05,\, 0{,}15]$ et $AR \in [30,\, 60]$~: des surfaces saines très allongées peuvent y coexister avec des \textit{silver faces} modérées.
+Dans le plan Compacité $\times$ Rapport d'aspect, les deux classes se séparent nettement~: les \textit{silver faces} occupent la région de faible compacité ($C < 0{,}15$) et de rapport d'aspect élevé ($AR > 60$), tandis que les surfaces saines se concentrent dans la région de forte compacité ($C > 0{,}5$) et de faible rapport d'aspect ($AR < 20$). La zone d'ambiguïté, encadrée en beige, correspond à $C \in [0{,}05,\, 0{,}15]$ et $AR \in [30,\, 60]$
 
 Cette visualisation confirme le rôle central de la compacité $C$ et du rapport d'aspect $AR$ comme caractéristiques principales du modèle~: leur pouvoir discriminant est maximal, et leur combinaison permet de délimiter une frontière de décision claire et robuste. Le modèle de régression logistique exploite précisément cette structure géométrique pour séparer les deux classes avec un minimum de mauvaises classifications.
 
 % ============================================================
-\section{Modèle : Régression Logistique}
+\section{Modèle Séléctionné: Régression Logistique}
 \label{sec:modele-rl}
 % ============================================================
 
@@ -120,29 +123,54 @@ où les symboles sont définis dans le \autoref{tab:zscore-symbols}.
     \end{tabularx}
 \end{table}
 
-Cette étape est indispensable : les caractéristiques ont des ordres de grandeur très différents (l'aire peut valoir 2\,000~mm² tandis que la compacité vaut 0.001), ce qui déséquilibrerait sinon le processus d'optimisation.
+Cette étape correspond à la \textbf{normalisation (standardisation)} des données avant l'entraînement du modèle. Elle consiste à ramener toutes les caractéristiques sur une échelle comparable, car leurs ordres de grandeur sont très différents. Par exemple, l’aire peut atteindre plusieurs milliers de mm$^2$, tandis que la compacité prend des valeurs très faibles. Sans cette mise à l’échelle, les variables de grande amplitude domineraient le processus d’optimisation et fausseraient l’apprentissage. Cette préparation est particulièrement importante lorsqu’on applique une \textbf{régularisation}, car celle-ci pénalise les coefficients du modèle et nécessite des variables comparables pour agir de manière équilibrée.
 
 \subsection{Fonction de décision}
 \label{subsec:decision-function}
 
-La régression logistique associe à chaque surface un score linéaire $z$, puis le transforme en probabilité via la \textbf{fonction sigmoïde} :
+La régression logistique produit une décision en trois étapes enchaînées.
+
+\subsubsection{Score linéaire}
+
+Les quatre caractéristiques normalisées de la surface sont combinées par une somme pondérée~:
 
 \begin{equation}
-    P(\text{\textit{silver face}} \mid \mathbf{x}) = \sigma(z) = \frac{1}{1 + e^{-z}}, \qquad z = \mathbf{w}^\top \tilde{\mathbf{x}} + b
+    z = w_1\tilde{C} + w_2\widetilde{AR} + w_3\tilde{A} + w_4\tilde{P} + b
+    \label{eq:score-lineaire}
+\end{equation}
+
+où $\mathbf{w} \in \mathbb{R}^4$ est le vecteur de poids appris et $b$ le biais. Un score $z > 0$ oriente vers une \textit{silver face}~; $z < 0$ oriente vers une surface saine.
+
+\subsubsection{Probabilité via la sigmoïde}
+
+Comme $z \in \mathbb{R}$ est non borné, il est converti en probabilité par la fonction sigmoïde~:
+
+\begin{equation}
+    P\!\left(\text{\textit{silver face}} \mid \mathbf{x}\right) = \sigma(z) = \frac{1}{1 + e^{-z}}
     \label{eq:sigmoid}
 \end{equation}
 
-où $\mathbf{w}$ est le vecteur des poids appris, $\tilde{\mathbf{x}}$ le vecteur des caractéristiques normalisées, et $b$ le biais.
+\subsubsection{Décision par seuil}
 
-La décision finale dépend d'un \textbf{seuil de classification} $\tau$ :
+La probabilité $P$ est comparée à un seuil $\tau \in (0,1)$~:
 
 \begin{equation}
     \hat{y} = \begin{cases}
-        1 \text{ (\textit{silver face})} & \text{si } P \geq \tau \\
-        0 \text{ (surface saine)}        & \text{sinon}
+        1 \;\text{(\textit{silver face})} & \text{si } P \geq \tau \\
+        0 \;\text{(surface saine)}        & \text{sinon}
     \end{cases}
     \label{eq:decision}
 \end{equation}
+
+Le seuil $\tau$ est le seul paramètre ajustable \textit{après} entraînement~: abaisser $\tau$ augmente le rappel (moins de défauts manqués) au prix d'un taux de fausse alarme plus élevé.
+
+\begin{block}[note]
+Soit une surface présentant une compacité très faible et une forte élongation. Après normalisation, supposons que son score linéaire vaille $z = +2{,}94$. La sigmoïde donne~:
+\[
+    P = \frac{1}{1+e^{-2{,}94}} \approx 0{,}95
+\]
+Avec $\tau = 0{,}5$~: $P = 0{,}95 \geq 0{,}5$ $\Rightarrow$ la surface est classifiée \textit{silver face} avec 95\,\% de confiance. En abaissant $\tau = 0{,}3$, la même règle s'applique à des surfaces moins certainement défectueuses, réduisant le risque de les manquer en production.
+\end{block}
 
 % ============================================================
 \section{Analyse des résultats}
@@ -155,30 +183,70 @@ La décision finale dépend d'un \textbf{seuil de classification} $\tau$ :
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{image/AI-SILVER-FACE/fig3_analysis.png}
-    \caption{Analyse du modèle sur le jeu de test : (a)~sigmoïde $\sigma(z)$, (b)~distribution des probabilités prédites, (c)~courbe ROC (AUC~=~0,989), (d)~courbe Précision-Rappel (AUC~=~0,959).}
+    \caption{Analyse du modèle de régression logistique sur le jeu de test.}
     \label{fig:analysis}
 \end{figure}
 
-Le panneau~(a) montre que chaque surface projetée sur la courbe sigmoïde selon son score linéaire $z$ se sépare nettement en deux nuages~; les rares points autour de $z \approx 0$ correspondent aux cas ambigus de la zone de chevauchement. Le panneau~(b) visualise le \textbf{recouvrement} entre les deux distributions~: plus les deux histogrammes sont séparés et étroits, plus le modèle est confiant.
+La figure présente quatre panneaux complémentaires. Les panneaux~(a) et~(b) montrent respectivement la projection des surfaces sur la sigmoïde et la distribution des probabilités prédites~: les deux classes se séparent nettement, les rares points autour de $z \approx 0$ correspondant aux cas ambigus. Les panneaux~(c) et~(d) quantifient les performances globales du modèle via deux courbes standard.
 
-La courbe ROC (panneau~c) représente le compromis entre le \textbf{taux de vrais positifs} (rappel, TPR) et le \textbf{taux de faux positifs} (FPR) pour tous les seuils $\tau$ possibles~:
+\subsubsection{Courbe ROC}
+
+La courbe ROC (\textit{Receiver Operating Characteristic}) représente, pour chaque valeur possible du seuil $\tau$, le compromis entre le \textbf{taux de vrais positifs} (TPR) et le \textbf{taux de faux positifs} (FPR)~:
 
 \begin{equation}
     \text{TPR} = \frac{VP}{VP + FN}, \qquad \text{FPR} = \frac{FP}{FP + VN}
     \label{eq:tpr-fpr}
 \end{equation}
 
-La courbe PR (panneau~d) est particulièrement adaptée aux \textbf{jeux de données déséquilibrés} (ici 73~\% saines / 27~\% \textit{silver faces}). Elle représente le compromis entre~:
+Une courbe qui colle au coin supérieur gauche ($\text{TPR} = 1$, $\text{FPR} = 0$) indique un modèle parfait~; la diagonale correspond à un classifieur aléatoire. L'aire sous la courbe (\textbf{AUC}) synthétise cette information en un seul scalaire~: ici $\text{AUC} = 0{,}989$, ce qui signifie que le modèle classe correctement 98{,}9~\% des paires (surface saine, \textit{silver face}) tirées aléatoirement.
+
+\subsubsection{Courbe Précision-Rappel}
+
+La courbe PR est particulièrement adaptée aux jeux de données déséquilibrés (ici 73~\% de surfaces saines contre 27~\% de \textit{silver faces}). Elle trace le compromis entre~:
 
 \begin{equation}
     \text{Précision} = \frac{VP}{VP + FP}, \qquad \text{Rappel} = \frac{VP}{VP + FN}
     \label{eq:precision-rappel}
 \end{equation}
 
-Dans un contexte de contrôle qualité, le \textbf{rappel} est prioritaire $\bullet$ manquer une \textit{silver face} (faux négatif) est plus coûteux qu'une fausse alarme. Un seuil abaissé à $\tau = 0{,}3$ augmente le rappel au prix d'une légère diminution de la précision.
+La \textbf{Précision} mesure la proportion de surfaces réellement défectueuses parmi celles signalées par le modèle. Le \textbf{Rappel} mesure la proportion de \textit{silver faces} réelles effectivement détectées. L'AUC-PR obtenue est de $0{,}959$, confirmant un niveau de discrimination très élevé même sur la classe minoritaire.
+
+Dans un contexte de contrôle qualité, \textbf{le rappel est prioritaire}~: manquer une \textit{silver face} entraîne un défaut non détecté en production, ce qui est plus coûteux qu'une fausse alarme traitée manuellement. En abaissant $\tau$ de $0{,}5$ à $0{,}3$, le rappel augmente sensiblement au prix d'une légère baisse de précision — un compromis favorable pour ce cas d'usage.
+
+\begin{table}[H]
+    \centering
+    \caption{Synthèse des métriques de performance du modèle}
+    \label{tab:performance-summary}
+    \begin{tabularx}{\textwidth}{|X|>{\centering\arraybackslash}p{3.5cm}|>{\centering\arraybackslash}p{3.5cm}|>{\centering\arraybackslash}p{3.5cm}|}
+        \hline
+        \rowcolor{headerblue}
+        \textcolor{white}{\textbf{Métrique}} &
+        \textcolor{white}{\textbf{Définition}} &
+        \textcolor{white}{\textbf{$\tau = 0{,}5$}} &
+        \textcolor{white}{\textbf{$\tau = 0{,}3$}} \tabularnewline
+        \hline
+        \rowcolor{rowlight}
+        AUC-ROC & Discrimination globale & \multicolumn{2}{c|}{$0{,}989$} \\
+        \hline
+        \rowcolor{rowwhite}
+        AUC-PR & Performance classe minoritaire & \multicolumn{2}{c|}{$0{,}959$} \\
+        \hline
+        \rowcolor{rowlight}
+        Rappel (TPR) & $VP / (VP + FN)$ & $0{,}88$ & $0{,}97$ \\
+        \hline
+        \rowcolor{rowwhite}
+        Précision & $VP / (VP + FP)$ & $0{,}97$ & $0{,}92$ \\
+        \hline
+        \rowcolor{rowlight}
+        Taux de faux positifs (FPR) & $FP / (FP + VN)$ & $0{,}01$ & $0{,}04$ \\
+        \hline
+    \end{tabularx}
+\end{table}
 
 \subsection{Frontière de décision}
 \label{subsec:decision-boundary}
+
+Une fois le modèle entraîné, il est essentiel de visualiser géométriquement ce qu'il a appris~: la \textbf{frontière de décision} est la ligne dans l'espace des caractéristiques où $P = \tau$, c'est-à-dire le lieu des surfaces pour lesquelles le modèle est exactement à la limite entre les deux classes. Cette visualisation permet de vérifier que la séparation est cohérente avec la structure des données observée et d'évaluer visuellement l'impact d'un changement de seuil.
 
 \begin{figure}[H]
     \centering
@@ -187,7 +255,7 @@ Dans un contexte de contrôle qualité, le \textbf{rappel} est prioritaire $\bul
     \label{fig:decision-boundary}
 \end{figure}
 
-Le seuil $\tau = 0.3$ est décalé vers la zone saine, ce qui permet de capturer davantage de \textit{silver faces} au prix d'un léger empiétement sur les surfaces saines ambiguës.
+La frontière tracée pour $\tau = 0{,}5$ sépare les deux classes de manière équilibrée. En abaissant à $\tau = 0{,}3$, la frontière se décale vers la zone des surfaces saines~: le modèle accepte davantage d'incertitude pour ne manquer aucun défaut, au prix d'un léger empiétement sur les surfaces saines ambiguës de la zone de chevauchement.
 
 % ============================================================
 \section{Métriques de classification}
@@ -241,36 +309,165 @@ Les quatre cases de la matrice de confusion sont définies dans le \autoref{tab:
 Avec le seuil standard $\tau = 0.5$, le modèle ne classe \textit{silver face} que les cas très probables, réduisant les faux positifs mais augmentant le risque de faux négatifs. Avec $\tau = 0.3$, le modèle est plus sensible et détecte davantage de \textit{silver faces} réelles au prix de quelques fausses alarmes supplémentaires. Dans un pipeline de contrôle qualité automatisé, ce compromis est préférable.
 
 % ============================================================
-\section{Interprétabilité $\bullet$ Poids du modèle}
-\label{sec:interpretabilite}
+\section{Tests de validation sur cas réels}
+\label{sec:tests-validation}
 % ============================================================
+
+Pour valider le comportement du modèle dans des conditions concrètes, trois surfaces représentatives ont été soumises au pipeline de classification. Chaque test présente les caractéristiques géométriques extraites, le score linéaire $z$ calculé, la probabilité $P$ issue de la sigmoïde, et la décision finale avec $\tau = 0{,}3$.
+
+% ------------------------------------------------------------
+\subsection{Exemple 1: Silver face classique}
+\label{subsec:test1}
+% ------------------------------------------------------------
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.85\textwidth]{image/AI-SILVER-FACE/fig6_weights.png}
-    \caption{Coefficients appris par la régression logistique (rouge~: facteur de risque, vert~: réducteur de risque).}
-    \label{fig:weights}
+    \includegraphics[width=0.85\textwidth]{image/AI-SILVER-FACE/exemple1.png}
+    \caption{Exemple~1 : surface à très faible compacité et rapport d'aspect extrême — classifiée \textit{silver face}.}
+    \label{fig:exemple1}
 \end{figure}
 
-Les poids $w_i$ indiquent la contribution de chaque caractéristique normalisée à la décision finale :
+\begin{table}[H]
+    \centering
+    \caption{Caractéristiques et résultat de classification — Exemple~1}
+    \label{tab:test1}
+    \begin{tabularx}{\textwidth}{|>{\bfseries}X|>{\centering\arraybackslash}p{5cm}|}
+        \hline
+        \rowcolor{headerblue}
+        \textcolor{white}{\textbf{Paramètre}} & \textcolor{white}{\textbf{Valeur}} \tabularnewline
+        \hline
+        \rowcolor{rowlight}
+        Compacité $C$ & $0{,}000310$ \\
+        \hline
+        \rowcolor{rowwhite}
+        Aire (mm²) & $0{,}00430$ \\
+        \hline
+        \rowcolor{rowlight}
+        Rapport d'aspect $AR$ & $847{,}0$ \\
+        \hline
+        \rowcolor{rowwhite}
+        Périmètre (mm) & $20{,}40$ \\
+        \hline
+        \rowcolor{rowlight}
+        Score linéaire $z$ & $+2{,}3442$ \\
+        \hline
+        \rowcolor{rowwhite}
+        $P(\textit{silver face})$ & $91{,}25\,\%$ \\
+        \hline
+        \rowcolor{rowlight}
+        Seuil $\tau$ utilisé & $0{,}3$ \\
+        \hline
+        \rowcolor{rowwhite}
+        \textbf{Décision} & \textbf{SILVER FACE} \\
+        \hline
+    \end{tabularx}
+\end{table}
 
-\begin{itemize}
-    \item Le \textbf{rapport d'aspect} ($AR$, coefficient $+4.228$) est le facteur le plus influent en faveur d'une détection \textit{silver face} : plus $AR$ est élevé, plus la surface est suspecte.
-    \item La \textbf{compacité} ($C$, coefficient $-6.006$) est le facteur protecteur dominant : une compacité élevée est une forte indication de surface saine.
-    \item L'\textbf{aire} et le \textbf{périmètre} jouent un rôle secondaire, affinant la décision dans les cas ambigus.
-\end{itemize}
+La faible compacité et le rapport d'aspect extrême placent $z = +2{,}34$ bien au-dessus de l'indécision~: $P = \sigma(+2{,}34) \approx 91{,}2\,\%$, soit une détection nette.
+
+% ------------------------------------------------------------
+\subsection{Exemple 2: Petit congé valide}
+\label{subsec:test2}
+% ------------------------------------------------------------
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{image/AI-SILVER-FACE/exemple2.png}
+    \caption{Exemple~2 : petit congé de faible aire mais compacité élevée — classifié surface saine.}
+    \label{fig:exemple2}
+\end{figure}
+
+\begin{table}[H]
+    \centering
+    \caption{Caractéristiques et résultat de classification — Exemple~2}
+    \label{tab:test2}
+    \begin{tabularx}{\textwidth}{|>{\bfseries}X|>{\centering\arraybackslash}p{5cm}|}
+        \hline
+        \rowcolor{headerblue}
+        \textcolor{white}{\textbf{Paramètre}} & \textcolor{white}{\textbf{Valeur}} \tabularnewline
+        \hline
+        \rowcolor{rowlight}
+        Compacité $C$ & $0{,}741$ \\
+        \hline
+        \rowcolor{rowwhite}
+        Aire (mm²) & $0{,}00700$ \\
+        \hline
+        \rowcolor{rowlight}
+        Rapport d'aspect $AR$ & $1{,}3$ \\
+        \hline
+        \rowcolor{rowwhite}
+        Périmètre (mm) & $0{,}84$ \\
+        \hline
+        \rowcolor{rowlight}
+        Score linéaire $z$ & $-16{,}2347$ \\
+        \hline
+        \rowcolor{rowwhite}
+        $P(\textit{silver face})$ & $0{,}00\,\%$ \\
+        \hline
+        \rowcolor{rowlight}
+        Seuil $\tau$ utilisé & $0{,}3$ \\
+        \hline
+        \rowcolor{rowwhite}
+        \textbf{Décision} & \textbf{Surface saine} \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+Malgré une aire similaire à l'exemple~1 ($0{,}007~\text{mm}^2$), la forme compacte et quasi carrée produit $z = -16{,}23$, soit $P \approx 0\,\%$. L'ancienne règle d'aire unique l'aurait classée \textit{silver face} à tort — ce cas démontre concrètement l'apport du modèle multi-critères.
+
+% ------------------------------------------------------------
+\subsection{Exemple 3: Cas ambigu}
+\label{subsec:test3}
+% ------------------------------------------------------------
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{image/AI-SILVER-FACE/exemple3.png}
+    \caption{Exemple~3 : surface en zone d'ambiguïté — classifiée \textit{silver face} uniquement grâce au seuil abaissé $\tau = 0{,}3$.}
+    \label{fig:exemple3}
+\end{figure}
+
+\begin{table}[H]
+    \centering
+    \caption{Caractéristiques et résultat de classification — Exemple~3}
+    \label{tab:test3}
+    \begin{tabularx}{\textwidth}{|>{\bfseries}X|>{\centering\arraybackslash}p{5cm}|}
+        \hline
+        \rowcolor{headerblue}
+        \textcolor{white}{\textbf{Paramètre}} & \textcolor{white}{\textbf{Valeur}} \tabularnewline
+        \hline
+        \rowcolor{rowlight}
+        Compacité $C$ & $0{,}045$ \\
+        \hline
+        \rowcolor{rowwhite}
+        Aire (mm²) & $0{,}00800$ \\
+        \hline
+        \rowcolor{rowlight}
+        Rapport d'aspect $AR$ & $62{,}0$ \\
+        \hline
+        \rowcolor{rowwhite}
+        Périmètre (mm) & $1{,}90$ \\
+        \hline
+        \rowcolor{rowlight}
+        Score linéaire $z$ & $-0{,}1241$ \\
+        \hline
+        \rowcolor{rowwhite}
+        $P(\textit{silver face})$ & $46{,}90\,\%$ \\
+        \hline
+        \rowcolor{rowlight}
+        Seuil $\tau$ utilisé & $0{,}3$ \\
+        \hline
+        \rowcolor{rowwhite}
+        \textbf{Décision} & \textbf{SILVER FACE} \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+Avec $\tau = 0{,}5$, ce cas ($P = 46{,}9\,\%$) aurait été classé \textbf{saine} — un faux négatif. Le seuil abaissé $\tau = 0{,}3$ permet de le capturer, justifiant son choix pour la mise en production.
 
 % ============================================================
-\section{Conclusion et recommandations}
+\section{Conclusion}
 \label{sec:innover-conclusion}
 % ============================================================
 
-Le modèle de régression logistique entraîné sur 1\,500 surfaces synthétiques démontre une capacité de discrimination robuste entre surfaces saines et \textit{silver faces}, avec une AUC-ROC de 0.989 et une AUC-PR de 0.959.
-
-\textbf{Recommandations pour la mise en production :}
-
-\begin{enumerate}
-    \item \textbf{Seuil de classification} : utiliser $\tau = 0.3$ plutôt que le seuil standard 0.5, afin de maximiser la détection des \textit{silver faces} dans un contexte de contrôle qualité.
-    \item \textbf{Indicateurs à surveiller} : la compacité $C$ et le rapport d'aspect $AR$ sont les deux signaux les plus discriminants. Une surface avec $C < 0.05$ et $AR > 100$ doit être systématiquement signalée.
-    \item \textbf{Intégration CATIA} : le modèle peut être appelé depuis un script VBScript (\texttt{silver\_faces.vbs}) en extrayant les quatre caractéristiques géométriques via les APIs de mensuration CATIA~V5.
-\end{enumerate}
+Le modèle de régression logistique entraîné sur 1\,500 surfaces démontre une capacité de discrimination robuste, avec une AUC-ROC de $0{,}989$ et une AUC-PR de $0{,}959$. Les trois tests de validation confirment que le modèle gère correctement les trois configurations critiques~: la détection franche d'une \textit{silver face} classique, le rejet correct d'un petit congé valide que l'ancienne règle aurait signalé à tort, et la capture d'un cas ambigu grâce au seuil abaissé $\tau = 0{,}3$. L'intégration de quatre caractéristiques géométriques complémentaires — compacité, rapport d'aspect, aire et périmètre — permet de dépasser les limites de l'approche par seuil unique et d'offrir une détection fiable et adaptable aux contextes industriels variés.

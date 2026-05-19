@@ -1,10 +1,11 @@
 %%% Fonts (XeLaTeX / fontspec) %%%
 \usepackage{fontspec}
 \defaultfontfeatures{Ligatures=TeX}
-\setmainfont{TeX Gyre Pagella}   % TeX Gyre Pagella (tgpagella / qpl) — Palatino-style OpenType
-\setsansfont{TeX Gyre Pagella}   % TeX Gyre Pagella companion
-\usepackage{lmodern}             % Latin Modern math and text fonts.
+\setmainfont{Palatino Linotype}   % Palatino (ppl) — classic Palatino OpenType
+\setsansfont{Palatino Linotype}   % Palatino companion
+% lmodern is NOT used: it resets \rmdefault and overrides fontspec in XeLaTeX.
 \usepackage{unicode-math}        % Unicode math font support.
+\setmathfont{Latin Modern Math}  % Math font (does not affect text font).
 \usepackage{fvextra}             % Enhanced customisation of verbatim environments.
 \usepackage{csquotes}            % Context-sensitive quotation marks.
 
